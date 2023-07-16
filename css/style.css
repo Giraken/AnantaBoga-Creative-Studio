@@ -82,10 +82,12 @@ nav {
 
 .nav-toggle-btn {
     display: none;
+    background: transparent;
+    color: var(--color-light);
 }
 
 .nav-logo {
-    width: 7.5rem;
+    /* width: 7.5rem; */
 }
 
 .nav-links {
@@ -103,7 +105,7 @@ nav {
 }
 
 .nav-contact button {
-    background: var(--color-bg-3);
+    background: transparent;
     color: var(--color-bg-4);
     display: grid;
     place-items: center;
@@ -112,6 +114,14 @@ nav {
 .nav-contact button a:hover {
     color: var(--color-bg-4);
 }
+
+/* .dropdown-menu{
+    position: absolute;
+    right: 2rem;
+    top: 60px;
+    width: 300px;
+    background: ;
+} */
 
 .home {
     margin: 0 auto;
@@ -161,14 +171,14 @@ nav {
 
 .about-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(350px, 1fr));
-    grid-gap: 20px;
+    grid-template-columns: repeat(auto-fit,minmax(250px, 1fr));
+    grid-gap: 150px;
 }
 
 .about-description {
-    height: 350px;
     color: var(--color-light);
     position: relative;
+    font-size: 1.5rem;
 }
 
 .about h2 {
@@ -197,11 +207,12 @@ nav {
     width: 100%;
     padding: 2rem;
     padding-top: 7rem;
+    margin-top: 200px;
 }
 
 .service-description {
     text-align: center;
-    width: 80%;
+    width: 100%;
     padding-bottom: 2rem;
 }
 
@@ -213,6 +224,7 @@ nav {
 
 .service-description p {
     font-weight: 300;
+    font-size: 1.5rem;
 }
 
 .service-container {
@@ -252,6 +264,7 @@ nav {
 
 .service-header h2 {
     font-weight: 600;
+    font-size: 1.5rem;
 }
 
 .service-detail {
@@ -260,7 +273,7 @@ nav {
 
 .service-detail p {
     padding: 0.6rem 1.5rem;
-    font-size: 0.8rem;
+    font-size: 1.5rem;
     border-bottom: 1px solid #d5d5d5;
 }
 
@@ -290,7 +303,7 @@ nav {
 
 .service-price p sup,
 .service-price p sub {
-    font-size: 1rem;
+    font-size: 1.2rem;
 }
 
 .service-btn {
@@ -301,6 +314,7 @@ nav {
     border-radius: 30px;
     cursor: pointer;
     transition: all 50ms ease-in;
+    font-size: 1.1rem;
 }
 
 .service-btn:hover {
@@ -394,4 +408,147 @@ nav {
 
 .gallery-container .image.show{
     animation: animate 0.4s ease;
+}
+
+@media screen and (max-width:1440px){
+    .about-container{
+        gap: 50px;
+    }
+
+    .service-description p{
+        font-size: 1rem;
+    }
+}
+
+@media screen and (max-width:1024px) {
+    .container {
+        width: var(--container-width-md);
+        position: relative;   
+    }
+
+    .nav-contact {
+        display: none;
+    }
+
+    .nav-links {
+        position: absolute;
+        top: 100%;
+        background: var(--color-bg-1);
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        transform-origin: top;
+    }
+
+    .nav-links li a {
+        background: var(--color-bg-4);
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 1rem 5rem 1rem 3rem;
+        border-top: 1px solid var(--color-bg-2);
+    }
+
+    .nav-toggle-btn {
+        display: inline-flex;
+        font-size: 2rem;
+        background: transparent;
+        cursor: pointer;
+        color: var(--color-light);
+    }
+
+    #nav-toggle-close {
+        display: none;
+    }
+
+    .about-container{
+        grid-gap: 100px;
+    }
+
+    .service-header h2 {
+        font-size: 1rem;
+    }
+
+    .service-detail p {
+        font-size: 0.8rem;
+    }
+
+    .service-btn{
+        font-size: 0.8rem;
+    }
+}
+
+@media screen and (max-width:882px) {
+    .about-container{
+        grid-gap: 250px;
+    }
+
+    .about-img img{
+        width: 750px;
+    }
+}
+
+@media screen and (max-width:860px) {
+    .about-container{
+        grid-gap: 250px;
+    }
+
+    .about-img img{
+        width: 700px;
+    }
+}
+
+@media screen and (max-width:800px) {
+    .about-container{
+        grid-gap: 200px;
+    }
+
+    .about-img img{
+        width: 650px;
+    }
+}
+
+@media screen and (max-width:750px) {
+    .about-container{
+        grid-gap: 150px;
+    }
+
+    .about-img img{
+        width: 600px;
+    }
+}
+
+@media screen and (max-width:650px) {
+    .about-container{
+        grid-gap: 50px;
+    }
+
+    .about-description{
+        font-size: 1rem;
+    }
+
+    .about-img img{
+        width: 500px;
+    }
+}
+
+@media screen and (max-width:550px) {
+    .about-container{
+        grid-gap: 100px;
+    }
+
+    .about-img img{
+        width: 300px;
+    }
+}
+
+@media screen and (max-width:300px) {
+    .about-container{
+        grid-gap: 100px;
+    }
+
+    .about-img img{
+        width: 150px;
+    }
 }
