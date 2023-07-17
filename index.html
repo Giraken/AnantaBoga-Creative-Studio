@@ -11,39 +11,34 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <!-- Iconscout -->
     <link href="https://unicons.iconscout.com/release/v4.0.0/css/unicons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    <nav>
-        <div class="container nav-container">
-            <a href="#" class="nav-logo"><img src="" alt="Nav Logo"></a>
+    <header>
+        <div class="nav">
+            <div class="nav-logo"><a href="#">Photography</a></div>
             <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#service">Service</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+            </ul>
+
+            <a href="#contact" class="nav-contact">Contact Us</a>
+            <div class="nav-toggle-btn">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+
+            <div class="dropdown-menu">
                 <li><a href="#">Home</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#service">Services</a></li>
                 <li><a href="#gallery">Gallery</a></li>
-            </ul>
-
-            <ul class="nav-contact">
-                <button><a href="#">Contact Us</a></button>
-            </ul>
-
-            
-            <button class="nav-toggle-btn" id="nav-toggle-open"><i class='bx bx-menu'></i></button>
-            <button class="nav-toggle-btn" id="nav-toggle-close"><i class='bx bx-x'></i></button>
-
-            <!-- <div class="nav-toggle-btn">
-                <i class="bx bx-menu"></i>
-            </div> -->
+                <li><a href="#contact" class="nav-contact-toggle">Contact Us</a></li>
+            </div>
         </div>
-
-        <!-- <div class="dropdown-menu">
-            <li><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#service">Services</a></li>
-            <li><a href="#gallery">Gallery</a></li>
-            <li><a href="#" class="nav-contact">Contact Us</a></li>
-        </div> -->
-    </nav>
+    </header>
 
     <!-- Home -->
     <section class="home" id="home">
@@ -138,9 +133,26 @@
             <button class="service-btn">Purchase</button>
         </div>
     </section>
+    <!-- Highlight Project -->
+    <section class="highlight" id="gallery">
+        <div class="video-container" data-aos="fade-right" data-aos-delay="300">
+            <video src="vid/coba.mp4" muted autoplay loop class="video"></video>
+            <div class="controls">
+                <span class="control-btn" data-src="vid/coba.mp4"></span>
+                <span class="control-btn" data-src="vid/coba-2.mp4"></span>
+                <span class="control-btn" data-src="vid/coba-3.mp4"></span>
+            </div>
+        </div>
+    
+        <div class="content" data-aos="fade-left" data-aos-delay="600">
+            <h2>Our Highlight Project</h2>
+            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Unde fugit repellat error deserunt nam aperiam odit libero quos provident. Nostrum?</p>
+            <a href="#gallery-recent" class="btn">take a look at our recent project</a>
+        </div>
+    </section>
 
     <!-- Our Gallery -->
-    <section class="gallery" id="gallery">
+    <section class="gallery" id="gallery-recent">
         <div class="gallery-description">
             <h2>Our Latest Work</h2>
             <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Possimus, sint modi? A beatae in, iste rem omnis quae velit! Voluptatem illum quaerat saepe, molestiae delectus eius quis iste voluptatibus inventore.</p>
@@ -168,6 +180,81 @@
         </div>
     </section>
 
+    <footer id="contact">
+        <div class="contact-description">
+            <h2>Contact Us</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sunt mollitia consequatur recusandae necessitatibus ducimus, iure asperiores eligendi, sit sint, iste dolor? Tenetur dolore corrupti veritatis obcaecati blanditiis ducimus placeat. Quia.</p>
+        </div>
+
+        <div class="contact-container">
+            <div class="contact-info">
+                <div class="contact-box">
+                    <div class="icon"><i class="fa-solid fa-location-dot"></i></div>
+                    <div class="text">
+                        <h3>Address</h3>
+                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. <br> Voluptatem, modi aperiam soluta itaque libero quasi nihil. <br> Dicta tempora vel sapiente ea deleniti minus nam, <br>illo quaerat fugit unde magni maxime?</p>
+                    </div>
+                </div>
+
+                <div class="contact-box">
+                    <div class="icon"><i class="fa-solid fa-phone"></i></div>
+                    <div class="text">
+                        <h3>Phone</h3>
+                        <p>0812 3456789</p>
+                    </div>
+                </div>
+
+                <div class="contact-box">
+                    <div class="icon"><i class="fa-solid fa-envelope"></i></div>
+                    <div class="text">
+                        <h3>Email</h3>
+                        <p>Photography@gmail.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form">
+                <form action="#">
+                    <h2>Send Message</h2>
+                    <div class="input-box">
+                        <input type="text" name="" required>
+                        <span>Full Name</span>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" name="" required>
+                        <span>Email</span>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" name="" required>
+                        <span>Type your message...</span>
+                    </div>
+                    <div class="input-box">
+                        <input type="submit" name="" value="Send">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </footer>
+
+    <div class="footer-copyright">
+        <h4>
+            @2023 Photography All Right Reserved
+        </h4>
+    </div>
+    <div class="shadow"></div> 
+
     <script src="js/script.js"></script>
+    <script src="js/carousel.js"></script>
+    <script type="text/javascript">
+    var nav = document.querySelector('.nav');
+
+    window.addEventListener('scroll', function () {
+        if (window.pageYOffset > 100) {
+            nav.classList.add('bg-nav');
+        } else {
+            nav.classList.remove('bg-nav', 'shadow');
+        }
+    });
+    </script>
 </body>
 </html>
