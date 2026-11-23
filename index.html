@@ -1,260 +1,551 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photography Portofolio</title>
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
-    <!-- Boxicons -->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <!-- Iconscout -->
-    <link href="https://unicons.iconscout.com/release/v4.0.0/css/unicons.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anantaboga Creative Studio</title>
+  <meta name="description" content="Anantaboga Creative Studio is a video and photo studio in Kota Batu, East Java. We film after movies, company profiles, public service ads, documentaries and school films.">
+  <meta property="og:title" content="Anantaboga Creative Studio">
+  <meta property="og:description" content="Video and photo studio in Kota Batu, East Java. After movies, company profiles, documentaries and school films.">
+  <meta property="og:image" content="image/logo-mark.webp">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="image/logo-mark-128.webp" type="image/webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/hero.css">
+  <link rel="stylesheet" href="css/sections.css">
+  <link rel="preload" as="image" href="image/hero-fallback.webp">
+  <script type="importmap">
+    {"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+  </script>
 </head>
 <body>
-    <header>
-        <div class="nav">
-            <div class="nav-logo"><a href="#">Photography</a></div>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#service">Service</a></li>
-                <li><a href="#gallery">Gallery</a></li>
-            </ul>
+  <a class="skip" href="#work">Skip to our portfolio</a>
 
-            <a href="#contact" class="nav-contact">Contact Us</a>
-            <div class="nav-toggle-btn">
-                <i class="fa-solid fa-bars"></i>
-            </div>
-
-            <div class="dropdown-menu">
-                <li><a href="#">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#service">Services</a></li>
-                <li><a href="#gallery">Gallery</a></li>
-                <li><a href="#contact" class="nav-contact-toggle">Contact Us</a></li>
-            </div>
-        </div>
-    </header>
-
-    <!-- Home -->
-    <section class="home" id="home">
-        <div class="home-container">
-            <h1>Capture your moments</h1>
-            <h4>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nemo sunt rerum enim totam inventore officiis suscipit quae, dignissimos, ex odio sit! Velit repudiandae assumenda sint minima tempore perferendis dolorem deleniti!</h4>
-        </div>
-    </section>
-
-    <!-- About Us -->
-    <section class="about" id="about">
-        <div class="about-container">
-            <div class="about-description">
-                <h2>About Us</h2>
-                <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Animi nemo voluptate assumenda iste nisi ex optio, ullam ipsa vel voluptas quidem, libero tenetur minima veniam ab itaque dolorem esse ad! <br> <br> 
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Provident veritatis non, totam dolor quis enim maiores cum pariatur? Dolores animi officiis quisquam error odio quas impedit vitae nulla soluta provident.</p>
-            </div>
-            
-            <div class="about-img">
-                <img src="image/about.jpg" alt="">
-            </div>
-        </div>
-    </section>
-
-    <!-- Our Services -->
-    <section class="service" id="service">
-        <div class="service-description">
-            <h2>Our Services</h2>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam provident amet earum nulla fugiat animi quibusdam, voluptas in voluptatum deserunt maxime atque, et labore facere dolores adipisci nam dolore id?</p>
-        </div>
-
-        <div class="service-container">
-            <div class="service-header">
-                <i class='bx bx-camera'></i>
-                <h2>Photography</h2>
-            </div>
-
-            <div class="service-detail">
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-            </div>
-
-            <div class="service-price">
-                <p><sup>$</sup>10/<sub>Months</sub></p>
-            </div>
-            
-            <button class="service-btn">Purchase</button>
-        </div>
-
-        <div class="service-container">
-            <div class="service-header">
-                <i class='bx bx-camera-movie'></i>
-                <h2>Videography</h2>
-            </div>
-
-            <div class="service-detail">
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-            </div>
-
-            <div class="service-price">
-                <p><sup>$</sup>10/<sub>Months</sub></p>
-            </div>
-            
-            <button class="service-btn">Purchase</button>
-        </div>
-
-        <div class="service-container">
-            <div class="service-header">
-                <i class='bx bx-dollar'></i>
-                <h2>Photography</h2>
-            </div>
-
-            <div class="service-detail">
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-                <p><span class="fas fa-check check"></span> <b>1</b> lorem</p>
-            </div>
-
-            <div class="service-price">
-                <p><sup>$</sup>10/<sub>Months</sub></p>
-            </div>
-            
-            <button class="service-btn">Purchase</button>
-        </div>
-    </section>
-    <!-- Highlight Project -->
-    <section class="highlight" id="gallery">
-        <div class="video-container" data-aos="fade-right" data-aos-delay="300">
-            <video src="vid/coba.mp4" muted autoplay loop class="video"></video>
-            <div class="controls">
-                <span class="control-btn" data-src="vid/coba.mp4"></span>
-                <span class="control-btn" data-src="vid/coba-2.mp4"></span>
-                <span class="control-btn" data-src="vid/coba-3.mp4"></span>
-            </div>
-        </div>
-    
-        <div class="content" data-aos="fade-left" data-aos-delay="600">
-            <h2>Our Highlight Project</h2>
-            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Unde fugit repellat error deserunt nam aperiam odit libero quos provident. Nostrum?</p>
-            <a href="#gallery-recent" class="btn">take a look at our recent project</a>
-        </div>
-    </section>
-
-    <!-- Our Gallery -->
-    <section class="gallery" id="gallery-recent">
-        <div class="gallery-description">
-            <h2>Our Latest Work</h2>
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Possimus, sint modi? A beatae in, iste rem omnis quae velit! Voluptatem illum quaerat saepe, molestiae delectus eius quis iste voluptatibus inventore.</p>
-        </div>
-
-        <div class="gallery-container">
-            <div class="image">
-                <img src="image/panca-warna.JPG" alt="">
-                <span>Product</span>
-                <h3>Panca Warna</h3>
-            </div>
-    
-            <div class="image">
-                <img src="image/sieka-1.JPG" alt="">
-                <span>Product</span>
-                <h3>Sieka Official</h3>
-            </div>
-              
-            <div class="image">
-                <img src="image/pre-wedding.JPG" alt="">
-                <span>Pre-Wedding</span>
-                <h3>Melki</h3>
-            </div>
-              
-        </div>
-    </section>
-
-    <footer id="contact">
-        <div class="contact-description">
-            <h2>Contact Us</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sunt mollitia consequatur recusandae necessitatibus ducimus, iure asperiores eligendi, sit sint, iste dolor? Tenetur dolore corrupti veritatis obcaecati blanditiis ducimus placeat. Quia.</p>
-        </div>
-
-        <div class="contact-container">
-            <div class="contact-info">
-                <div class="contact-box">
-                    <div class="icon"><i class="fa-solid fa-location-dot"></i></div>
-                    <div class="text">
-                        <h3>Address</h3>
-                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. <br> Voluptatem, modi aperiam soluta itaque libero quasi nihil. <br> Dicta tempora vel sapiente ea deleniti minus nam, <br>illo quaerat fugit unde magni maxime?</p>
-                    </div>
-                </div>
-
-                <div class="contact-box">
-                    <div class="icon"><i class="fa-solid fa-phone"></i></div>
-                    <div class="text">
-                        <h3>Phone</h3>
-                        <p>0812 3456789</p>
-                    </div>
-                </div>
-
-                <div class="contact-box">
-                    <div class="icon"><i class="fa-solid fa-envelope"></i></div>
-                    <div class="text">
-                        <h3>Email</h3>
-                        <p>Photography@gmail.com</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="contact-form">
-                <form action="#">
-                    <h2>Send Message</h2>
-                    <div class="input-box">
-                        <input type="text" name="" required>
-                        <span>Full Name</span>
-                    </div>
-                    <div class="input-box">
-                        <input type="text" name="" required>
-                        <span>Email</span>
-                    </div>
-                    <div class="input-box">
-                        <input type="text" name="" required>
-                        <span>Type your message...</span>
-                    </div>
-                    <div class="input-box">
-                        <input type="submit" name="" value="Send">
-                    </div>
-                </form>
-            </div>
-        </div>
-    </footer>
-
-    <div class="footer-copyright">
-        <h4>
-            @2023 Photography All Right Reserved
-        </h4>
+  <header class="site-head">
+    <div class="head-row">
+      <a class="brand" href="#top" aria-label="Anantaboga Creative Studio, back to top">
+        <img class="brand-mark" src="image/logo-mark-128.webp" alt="" width="36" height="36">
+        <span class="brand-text">Anantaboga Creative Studio</span>
+      </a>
+      <nav class="nav-center" aria-label="Main">
+        <a href="#about">About</a><a href="#work">Work</a><a href="#contact">Contact</a>
+      </nav>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu"><span></span></button>
+      <nav class="nav" id="nav" aria-label="Menu">
+        <a href="#top">Home</a>
+        <a href="#about">About Us</a>
+        <a href="#services">Services</a>
+        <a href="#work">Portfolio</a>
+        <a href="#contact">Contact Us</a>
+        <a class="btn btn-orange" href="#contact">Book a shoot</a>
+      </nav>
     </div>
-    <div class="shadow"></div> 
+  </header>
 
-    <script src="js/script.js"></script>
-    <script src="js/carousel.js"></script>
-    <script type="text/javascript">
-    var nav = document.querySelector('.nav');
+  <main>
+    <section class="hero3d" id="top" aria-labelledby="hero-title">
+      <div class="hero-stage-wrap">
+        <div class="pg" aria-hidden="true">
+          <span class="pg-line v v1"></span><span class="pg-line v v2"></span><span class="pg-line v v3"></span>
+          <span class="pg-line h h1"></span><span class="pg-line h h2"></span>
+          <span class="pg-circle c1"></span><span class="pg-circle c2"></span><span class="pg-circle c3"></span>
+        </div>
+        <img class="hero3d-fallback" src="image/hero-fallback.webp" alt="" width="720" height="720" fetchpriority="high">
+        <div class="hero3d-stage"></div>
+        <div class="dragon-anchor" aria-hidden="true"></div>
+        <h1 class="poster-head" id="hero-title">
+          <span class="sr-only">Anantaboga Creative Studio: </span>
+          <span class="poster-block pb1" aria-hidden="true"></span><span class="poster-block pb2" aria-hidden="true"></span>
+          <span class="ph-text"><span class="ph-line">Forged in</span><span class="ph-line ph-l2">Legend</span></span>
+        </h1>
+        <p class="pg-label lb1">[2026]</p>
+        <p class="pg-label lb2">[Video &amp; photo]</p>
+        <p class="pg-label lb3">[Kota Batu, East Java]</p>
+        <p class="side-name" aria-hidden="true">Anantaboga</p>
+        <nav class="page-dots" aria-label="Page sections">
+          <a href="#top" class="is-active" aria-current="true">01</a><a href="#about">02</a><a href="#services">03</a><a href="#work">04</a>
+        </nav>
+      </div>
 
-    window.addEventListener('scroll', function () {
-        if (window.pageYOffset > 100) {
-            nav.classList.add('bg-nav');
-        } else {
-            nav.classList.remove('bg-nav', 'shadow');
-        }
-    });
-    </script>
+      <div class="hero-side hero-right">
+        <ol class="hero-services" aria-label="What we make">
+          <li class="is-active"><a href="#services"><span>01</span>Aftermovies</a></li>
+          <li><a href="#services"><span>02</span>Company Profiles</a></li>
+          <li><a href="#services"><span>03</span>Documentaries</a></li>
+        </ol>
+        <p class="hero-stat"><b>27</b> films for festivals, schools, brands and government</p>
+        <div class="hero-actions">
+          <a class="btn btn-orange" href="#work">View Work</a>
+          <a class="btn btn-outline" href="#contact">Contact</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="clients" aria-labelledby="clients-title">
+      <div class="wrap">
+        <h2 id="clients-title">Organisations across East Java choose Anantaboga</h2>
+        <ul class="client-logos">
+          <li>Kemendagri</li><li>Komdigi</li><li>Kominfo</li><li>United Tractors</li><li>First Resources</li><li>PT Bina Pertiwi</li><li>Ginaris Art Indonesia</li><li>Kota Wisata Batu</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section about" id="about" aria-labelledby="about-title">
+      <div class="wrap">
+        <div class="ghost-head">
+          <span class="ghost" aria-hidden="true">Key features</span>
+          <p class="eyebrow">Key features</p>
+        </div>
+        <div class="about-grid">
+          <figure class="about-media">
+            <img src="image/work/batu-culture-festival.webp" alt="Dancers in gold headdresses at Batu Culture Festival 2025, filmed by Anantaboga" width="1280" height="720" loading="lazy">
+            <figcaption><span class="rec-dot" aria-hidden="true"></span>Batu Culture Festival 2025</figcaption>
+          </figure>
+          <div class="about-copy">
+            <h2 class="display" id="about-title">Crafting visual stories that captivate</h2>
+            <p>Anantaboga Creative Studio is a video and photo studio in Mojorejo, Kota Batu. We film the festivals, ceremonies, offices and classrooms of East Java, and cut them into films people want to watch and share.</p>
+            <ul class="features">
+              <li><span class="f-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h11v10H4zM15 10l5-3v10l-5-3"/></svg></span><div><h3>From plan to final cut</h3><p>We plan the shoot with you, film on the day and handle the edit, music and titles.</p></div></li>
+              <li><span class="f-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div><h3>Filmed where it happens</h3><p>On location across Batu, Malang and East Java, from village carnivals to ministry events.</p></div></li>
+              <li><span class="f-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 9h12M6 15h12"/></svg></span><div><h3>Cut for where it's shown</h3><p>A five-minute after movie, a one-minute ad or a short for social, edited to fit.</p></div></li>
+            </ul>
+            <a class="link-more" href="#services">Learn more<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+        </div>
+        <dl class="stats">
+          <div><dt>Films in our portfolio</dt><dd>27</dd></div>
+          <div><dt>After movies</dt><dd>17</dd></div>
+          <div><dt>Organisations named here</dt><dd>8+</dd></div>
+          <div><dt>Kinds of work</dt><dd>6</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section light" id="services" aria-labelledby="services-title">
+      <div class="wrap">
+        <div class="ghost-head">
+          <span class="ghost" aria-hidden="true">Our services</span>
+          <p class="eyebrow">Our services</p>
+        </div>
+        <div class="svc-head">
+          <h2 class="display" id="services-title">We provide video and photo for every occasion</h2>
+          <a class="badge" href="#contact" aria-label="Contact us">
+            <svg viewBox="0 0 120 120" aria-hidden="true"><defs><path id="badge-circle" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
+              <text><textPath href="#badge-circle" textLength="282" lengthAdjust="spacing">Contact us ✷ Contact us ✷</textPath></text></svg>
+            <span class="badge-arrow"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </a>
+        </div>
+        <ul class="svc-list">
+          <li class="svc">
+            <a href="#work" data-open="batu-culture-festival">
+              <span class="svc-name">After movies</span>
+              <span class="svc-desc">Festivals, carnivals, ceremonies and company events, cut into a film your guests will share.</span>
+              <span class="svc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            </a>
+          </li>
+          <li class="svc">
+            <a href="#work" data-open="united-tractors">
+              <span class="svc-name">Company profiles</span>
+              <span class="svc-desc">Who you are, what you do and the people behind it, filmed on site.</span>
+              <span class="svc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            </a>
+          </li>
+          <li class="svc">
+            <a href="#work" data-open="ilm-kerajinan">
+              <span class="svc-name">Public service ads</span>
+              <span class="svc-desc">Short, clear films for government programs and campaigns.</span>
+              <span class="svc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            </a>
+          </li>
+          <li class="svc">
+            <a href="#work" data-open="ginaris-documentary">
+              <span class="svc-name">Documentaries</span>
+              <span class="svc-desc">Longer stories about a community or a milestone, told by the people who lived it.</span>
+              <span class="svc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            </a>
+          </li>
+          <li class="svc">
+            <a href="#work" data-open="smpn2-pensi">
+              <span class="svc-name">School films</span>
+              <span class="svc-desc">Class videos, ceremonies and art shows, so every student has the year on film.</span>
+              <span class="svc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            </a>
+          </li>
+          <li class="svc">
+            <a href="#contact">
+              <span class="svc-name">Photography</span>
+              <span class="svc-desc">Pre-wedding sessions and product photos for local brands.</span>
+              <span class="svc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="work" aria-labelledby="work-title">
+      <div class="wrap">
+        <div class="ghost-head">
+          <span class="ghost" aria-hidden="true">Portfolio</span>
+          <p class="eyebrow">Portfolio</p>
+        </div>
+        <div class="pf-head">
+          <h2 class="display" id="work-title">We create films people share</h2>
+          <button class="btn btn-outline" type="button" aria-expanded="false" aria-controls="all-works" data-toggle-works>View all works<span class="count">27</span></button>
+        </div>
+        <ul class="pf-grid">
+          <li class="pf-card is-wide">
+            <button type="button" data-open="batu-culture-festival" aria-label="Play Batu Culture Festival “Sesarengan Anggayuh Endah”">
+              <img src="image/work/batu-culture-festival.webp" alt="" width="1280" height="720" loading="lazy">
+              <span class="pf-play" aria-hidden="true"><span class="play"></span></span>
+            </button>
+            <div class="pf-text"><p class="pf-tag">After movie</p><h3>Batu Culture Festival “Sesarengan Anggayuh Endah”</h3><p class="pf-client">Kota Batu</p></div>
+          </li>
+          <li class="pf-card">
+            <button type="button" data-open="grebeg-ketupat" aria-label="Play Grebeg Ketupat Syawal 1446 H">
+              <img src="image/work/grebeg-ketupat.webp" alt="" width="1280" height="720" loading="lazy">
+              <span class="pf-play" aria-hidden="true"><span class="play"></span></span>
+            </button>
+            <div class="pf-text"><p class="pf-tag">After movie</p><h3>Grebeg Ketupat Syawal 1446 H</h3><p class="pf-client">Kota Wisata Batu</p></div>
+          </li>
+          <li class="pf-card">
+            <button type="button" data-open="first-resources" aria-label="Play Meeting The Winning Mindset “Staying Ahead of the Curve”">
+              <img src="image/work/first-resources.webp" alt="" width="1280" height="720" loading="lazy">
+              <span class="pf-play" aria-hidden="true"><span class="play"></span></span>
+            </button>
+            <div class="pf-text"><p class="pf-tag">After movie</p><h3>Meeting The Winning Mindset “Staying Ahead of the Curve”</h3><p class="pf-client">First Resources</p></div>
+          </li>
+          <li class="pf-card is-wide">
+            <button type="button" data-open="kemendagri" aria-label="Play Pengembangan Motivasi Desa dan Kelurahan Berprestasi">
+              <img src="image/work/kemendagri.webp" alt="" width="1280" height="720" loading="lazy">
+              <span class="pf-play" aria-hidden="true"><span class="play"></span></span>
+            </button>
+            <div class="pf-text"><p class="pf-tag">After movie</p><h3>Pengembangan Motivasi Desa dan Kelurahan Berprestasi</h3><p class="pf-client">Kemendagri</p></div>
+          </li>
+          <li class="pf-card">
+            <button type="button" data-open="dolan-jaran" aria-label="Play Festival Generasi Ema5, Lomba Tari Dolan Jaran">
+              <img src="image/work/dolan-jaran.webp" alt="" width="1280" height="720" loading="lazy">
+              <span class="pf-play" aria-hidden="true"><span class="play"></span></span>
+            </button>
+            <div class="pf-text"><p class="pf-tag">After movie</p><h3>Festival Generasi Ema5, Lomba Tari Dolan Jaran</h3><p class="pf-client">Ginaris Art Indonesia</p></div>
+          </li>
+          <li class="pf-card">
+            <button type="button" data-open="smpn2-tasyakuran" aria-label="Play Tasyakuran SMPN 02 Batu">
+              <img src="image/work/smpn2-tasyakuran.webp" alt="" width="1280" height="720" loading="lazy">
+              <span class="pf-play" aria-hidden="true"><span class="play"></span></span>
+            </button>
+            <div class="pf-text"><p class="pf-tag">School film</p><h3>Tasyakuran SMPN 02 Batu</h3><p class="pf-client">SMPN 02 Batu</p></div>
+          </li>
+          <li class="pf-card">
+            <button type="button" data-open="rock-gunung" aria-label="Play Rock Gunung #2">
+              <img src="image/work/rock-gunung.webp" alt="" width="1280" height="720" loading="lazy">
+              <span class="pf-play" aria-hidden="true"><span class="play"></span></span>
+            </button>
+            <div class="pf-text"><p class="pf-tag">After movie</p><h3>Rock Gunung #2</h3><p class="pf-client">Kota Batu</p></div>
+          </li>
+        </ul>
+
+        <div class="all-works" id="all-works" hidden>
+          <h3 class="all-title">All 27 films</h3>
+          <div class="filters" role="group" aria-label="Show films by type">
+            <button type="button" aria-pressed="true" data-filter="all">All films<span class="count">27</span></button><button type="button" aria-pressed="false" data-filter="event">After movies<span class="count">17</span></button><button type="button" aria-pressed="false" data-filter="brand">Company profiles and PSAs<span class="count">5</span></button><button type="button" aria-pressed="false" data-filter="doc">Documentaries and stories<span class="count">2</span></button><button type="button" aria-pressed="false" data-filter="school">School films<span class="count">3</span></button>
+          </div>
+          <div class="work">
+            <ul class="work-list">
+        <li class="film" data-slug="batu-culture-festival" data-type="event" data-drive="1ucEgEdHYjnD_t5-hCEWul9C1fkKDnBLX" data-still="image/work/batu-culture-festival.webp" data-title="Batu Culture Festival “Sesarengan Anggayuh Endah”" data-meta="Kota Batu, After movie, 2025">
+          <button type="button">
+            <img class="film-thumb" src="image/work/batu-culture-festival.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Batu Culture Festival “Sesarengan Anggayuh Endah”</span>
+            <span class="film-meta">Kota Batu, After movie, 2025</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="grebeg-ketupat" data-type="event" data-drive="1CyHQCtSFMrnK-p0HWOhDYPUU-HbPZkl9" data-still="image/work/grebeg-ketupat.webp" data-title="Grebeg Ketupat Syawal 1446 H" data-meta="Kota Wisata Batu, After movie, 2025">
+          <button type="button">
+            <img class="film-thumb" src="image/work/grebeg-ketupat.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Grebeg Ketupat Syawal 1446 H</span>
+            <span class="film-meta">Kota Wisata Batu, After movie, 2025</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="united-tractors" data-type="brand" data-drive="1FLPvHCA3u2iDeh0-LS3Kd7k_uEbEBPdw" data-still="image/work/united-tractors.webp" data-title="United Tractors" data-meta="Company profile">
+          <button type="button">
+            <img class="film-thumb" src="image/work/united-tractors.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">United Tractors</span>
+            <span class="film-meta">Company profile</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="kemendagri" data-type="event" data-drive="1vxkYy64lhztsU85ye8koywLxpFRab4tN" data-still="image/work/kemendagri.webp" data-title="Pengembangan Motivasi Desa dan Kelurahan Berprestasi" data-meta="Kemendagri, After movie">
+          <button type="button">
+            <img class="film-thumb" src="image/work/kemendagri.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Pengembangan Motivasi Desa dan Kelurahan Berprestasi</span>
+            <span class="film-meta">Kemendagri, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="komdigi" data-type="event" data-drive="1QMD1UsUGzqF85onfLENFWWSSAStsxanu" data-still="image/work/komdigi.webp" data-title="Kampanye Anti Judol dan Pinjol Ilegal, Peninjauan Akses Internet BAKTI" data-meta="Komdigi, After movie">
+          <button type="button">
+            <img class="film-thumb" src="image/work/komdigi.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Kampanye Anti Judol dan Pinjol Ilegal, Peninjauan Akses Internet BAKTI</span>
+            <span class="film-meta">Komdigi, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="first-resources" data-type="event" data-drive="11fYrWr_dGaM7wMF5bN3D9wTQdnw6KhZS" data-still="image/work/first-resources.webp" data-title="Meeting The Winning Mindset “Staying Ahead of the Curve”" data-meta="First Resources, After movie">
+          <button type="button">
+            <img class="film-thumb" src="image/work/first-resources.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Meeting The Winning Mindset “Staying Ahead of the Curve”</span>
+            <span class="film-meta">First Resources, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="dolan-jaran" data-type="event" data-drive="1jyXEHe9GOe_w37V7FGYVPjgsw9bnA8k2" data-still="image/work/dolan-jaran.webp" data-title="Festival Generasi Ema5, Lomba Tari Dolan Jaran" data-meta="Ginaris Art Indonesia, After movie, 2025">
+          <button type="button">
+            <img class="film-thumb" src="image/work/dolan-jaran.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Festival Generasi Ema5, Lomba Tari Dolan Jaran</span>
+            <span class="film-meta">Ginaris Art Indonesia, After movie, 2025</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="patrol-sidomulyo" data-type="event" data-drive="1uQW2Q2gaK4pH1tlMoNXHzMJDtsm0IhBG" data-still="image/work/patrol-sidomulyo.webp" data-title="Gema Festival Patrol Sidomulyo" data-meta="Sidomulyo, Kota Batu, After movie, 2025">
+          <button type="button">
+            <img class="film-thumb" src="image/work/patrol-sidomulyo.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Gema Festival Patrol Sidomulyo</span>
+            <span class="film-meta">Sidomulyo, Kota Batu, After movie, 2025</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="rock-gunung" data-type="event" data-drive="1oH8mWmZqbQ0yJajtML7SBx1-h1BqTgce" data-still="image/work/rock-gunung.webp" data-title="Rock Gunung #2" data-meta="Kota Batu, After movie">
+          <button type="button">
+            <img class="film-thumb" src="image/work/rock-gunung.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Rock Gunung #2</span>
+            <span class="film-meta">Kota Batu, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="pujon-adventure" data-type="event" data-drive="1ttU7kiE4uAQOSuxYuCCL1kuNaz3k8SOu" data-still="image/work/pujon-adventure.webp" data-title="Family Gathering at Pujon Adventure" data-meta="PT Surya Citra Sempurna, After movie">
+          <button type="button">
+            <img class="film-thumb" src="image/work/pujon-adventure.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Family Gathering at Pujon Adventure</span>
+            <span class="film-meta">PT Surya Citra Sempurna, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="ilm-kerajinan" data-type="brand" data-drive="14RWf4wCu5qaAA-NWufyySbGNaiCaEdKd" data-still="image/work/ilm-kerajinan.webp" data-title="Public service ad: local crafts" data-meta="Kominfo, Public service ad">
+          <button type="button">
+            <img class="film-thumb" src="image/work/ilm-kerajinan.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Public service ad: local crafts</span>
+            <span class="film-meta">Kominfo, Public service ad</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="ilm-olahan" data-type="brand" data-drive="14rdn4QaG39kszUzPoO2yGndX1wbFjmAb" data-still="image/work/ilm-olahan.webp" data-title="Public service ad: local food products" data-meta="Kominfo, Public service ad">
+          <button type="button">
+            <img class="film-thumb" src="image/work/ilm-olahan.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Public service ad: local food products</span>
+            <span class="film-meta">Kominfo, Public service ad</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="smpn2-tasyakuran" data-type="school" data-drive="1PQDAkZ8CbheApaNW7XUVD4w3tso4jRUM" data-still="image/work/smpn2-tasyakuran.webp" data-title="Tasyakuran SMPN 02 Batu" data-meta="SMPN 02 Batu, School film, 2025">
+          <button type="button">
+            <img class="film-thumb" src="image/work/smpn2-tasyakuran.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Tasyakuran SMPN 02 Batu</span>
+            <span class="film-meta">SMPN 02 Batu, School film, 2025</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="smpn2-pensi" data-type="school" data-drive="1JOlJCJGZKg0TMQeb_LoOliMc3IxKlvvf" data-still="image/work/smpn2-pensi.webp" data-title="Pensi Hari Baik" data-meta="SMPN 02 Batu, School film">
+          <button type="button">
+            <img class="film-thumb" src="image/work/smpn2-pensi.webp" alt="" width="1280" height="720" loading="lazy">
+            <span class="film-title">Pensi Hari Baik</span>
+            <span class="film-meta">SMPN 02 Batu, School film</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="reog-ponorogo" data-type="event" data-drive="1q4G0lLuN4-gq4MnojayuwDFsjHBs2Ll6" data-still="" data-title="Festival Nasional Reog Ponorogo" data-meta="Group Reog Sapto Tunggul Wulung, Kota Batu, After movie, 2025">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Festival Nasional Reog Ponorogo</span>
+            <span class="film-meta">Group Reog Sapto Tunggul Wulung, Kota Batu, After movie, 2025</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="ginaris-documentary" data-type="doc" data-drive="1-kCwmseet0VbVVOR5Kyir7EhekrImnez" data-still="" data-title="Journey to 5 Years" data-meta="Ginaris Art Indonesia, Documentary">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Journey to 5 Years</span>
+            <span class="film-meta">Ginaris Art Indonesia, Documentary</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="ngarak-banteng" data-type="event" data-drive="13k3n13RPVJT6gR7O8gfym1WRIdBhoxxG" data-still="" data-title="Ngarak Banteng 1 Suro, Empu Supo ke-17" data-meta="Empu Supo, After movie">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Ngarak Banteng 1 Suro, Empu Supo ke-17</span>
+            <span class="film-meta">Empu Supo, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="bumi-agriraya" data-type="event" data-drive="1isAb0W-HRYjhvkHBOdfLkEzZziplPCCY" data-still="" data-title="Festival Bumi Agriraya Tulungrejo, Carnival" data-meta="Tulungrejo, Kota Batu, After movie">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Festival Bumi Agriraya Tulungrejo, Carnival</span>
+            <span class="film-meta">Tulungrejo, Kota Batu, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="color-run" data-type="event" data-drive="1o1uFoZVL3rxr_ODibI0bSfaqiNnGWrxy" data-still="" data-title="Color Run Lightfest" data-meta="After movie, 2025">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Color Run Lightfest</span>
+            <span class="film-meta">After movie, 2025</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="bina-pertiwi" data-type="event" data-drive="1YvFqH-Ge6YQMA8Ic7m88NlwcgqKszDUS" data-still="" data-title="Penanaman 2.448 Pohon Alpukat" data-meta="PT Bina Pertiwi, After movie">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Penanaman 2.448 Pohon Alpukat</span>
+            <span class="film-meta">PT Bina Pertiwi, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="apel-siaga" data-type="event" data-drive="1Ph3LBm_Pber6DN8CGOkeX0fK43jmQD98" data-still="" data-title="Apel Siaga dan Simulasi Tanggap Bencana" data-meta="After movie">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Apel Siaga dan Simulasi Tanggap Bencana</span>
+            <span class="film-meta">After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="ginaris-8" data-type="event" data-drive="11Ah28gaeMfMxtlRLURJ8eRAPIUQwsSmp" data-still="" data-title="Gelar Uji Kompetensi Ginaris Art, Jilid 8" data-meta="Ginaris Art Indonesia, After movie">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Gelar Uji Kompetensi Ginaris Art, Jilid 8</span>
+            <span class="film-meta">Ginaris Art Indonesia, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="ginaris-7" data-type="event" data-drive="1smopnYUgH3Vl0AnrX2GlrhY3Qpb8DclX" data-still="" data-title="Gelar Uji Kompetensi Ginaris Art, Jilid 7" data-meta="Ginaris Art Indonesia, After movie">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Gelar Uji Kompetensi Ginaris Art, Jilid 7</span>
+            <span class="film-meta">Ginaris Art Indonesia, After movie</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="arjuna-wiwaha" data-type="brand" data-drive="1eRz5UzwxIiCfelNRZaF2bdJ5U03dOTLu" data-still="" data-title="Sendratari Arjuna Wiwaha" data-meta="EJTA Kota Batu, Promotional film, 2023">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Sendratari Arjuna Wiwaha</span>
+            <span class="film-meta">EJTA Kota Batu, Promotional film, 2023</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="omah-wayang" data-type="brand" data-drive="1BxQ9V7vSgKBzgPjxct1fFxM22aaZXM4q" data-still="" data-title="Omah Wayang KML" data-meta="EJTA Kota Batu, Promotional film, 2023">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Omah Wayang KML</span>
+            <span class="film-meta">EJTA Kota Batu, Promotional film, 2023</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="gita-wawan" data-type="doc" data-drive="118Ro5ZI72p8Ynm5ct9nxFpf2wVFiOkrI" data-still="" data-title="Gita and Wawan, a pre-wedding story" data-meta="Pre-wedding film">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Gita and Wawan, a pre-wedding story</span>
+            <span class="film-meta">Pre-wedding film</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+        <li class="film" data-slug="smpn4-angkatan" data-type="school" data-drive="1kMyvCJj1FSDSctKCqK02_og8iSXM9vRi" data-still="" data-title="Video angkatan" data-meta="SMPN 4 Batu, Class video">
+          <button type="button">
+            <span class="film-thumb is-slate" aria-hidden="true"></span>
+            <span class="film-title">Video angkatan</span>
+            <span class="film-meta">SMPN 4 Batu, Class video</span>
+            <span class="film-play" aria-hidden="true"><span class="play"></span></span>
+          </button>
+        </li>
+            </ul>
+            <aside class="monitor" aria-label="Preview">
+              <button class="monitor-frame" type="button">
+                <img src="image/work/batu-culture-festival.webp" alt="Still from Batu Culture Festival “Sesarengan Anggayuh Endah”" width="1280" height="720">
+                <span class="monitor-slate" aria-hidden="true"></span>
+                <span class="monitor-play"><span class="play" aria-hidden="true"></span>Play film</span>
+              </button>
+              <p class="monitor-cap"><b class="monitor-title">Batu Culture Festival “Sesarengan Anggayuh Endah”</b><span class="monitor-meta"></span></p>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <a class="together" href="#contact" aria-label="Let's work together: go to contact details">
+      <span class="together-track" aria-hidden="true"><span>Let&rsquo;s work together!</span><span>Let&rsquo;s work together!</span><span>Let&rsquo;s work together!</span><span>Let&rsquo;s work together!</span><span>Let&rsquo;s work together!</span><span>Let&rsquo;s work together!</span><span>Let&rsquo;s work together!</span><span>Let&rsquo;s work together!</span></span>
+    </a>
+
+    <section class="section contact" id="contact" aria-labelledby="contact-title">
+      <div class="wrap contact-grid">
+        <div>
+          <p class="eyebrow">Have an idea?</p>
+          <h2 class="display" id="contact-title">Let&rsquo;s talk.</h2>
+          <p class="contact-lede">We make films that connect events, brands and communities with the people who matter to them. Tell us the date, the place and what the film is for, and we'll send you a plan and a price.</p>
+          <dl class="visit-list">
+            <div><dt>Studio</dt><dd>Mojorejo, Kec. Junrejo, Kota Batu, Jawa Timur 65322</dd></div>
+            <div><dt>Email</dt><dd><a href="mailto:anantabogacreativestudio@gmail.com">anantabogacreativestudio@gmail.com</a></dd></div>
+          </dl>
+          <div class="visit-actions">
+            <a class="btn btn-orange" href="mailto:anantabogacreativestudio@gmail.com?subject=Project%20enquiry">Contact us</a>
+            <a class="btn btn-outline" href="https://maps.app.goo.gl/mMN3CuisLAhA4bdY6" target="_blank" rel="noopener">Get directions</a>
+          </div>
+        </div>
+        <div class="map">
+          <iframe src="https://maps.google.com/maps?q=Anantaboga+Creative+Studio,+Mojorejo,+Junrejo,+Kota+Batu,+Jawa+Timur+65322&z=15&output=embed" title="Map showing Anantaboga Creative Studio in Mojorejo, Kota Batu" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top"><img class="brand-mark" src="image/logo-mark-128.webp" alt="" width="36" height="36"><span class="brand-name">Anantaboga</span></a>
+        <p>A creative studio in Kota Batu making after movies, company profiles, documentaries and photography.</p>
+      </div>
+      <nav class="foot-col" aria-label="Footer">
+        <h2>Studio</h2>
+        <a href="#top">Home</a><a href="#about">About Us</a><a href="#services">Services</a><a href="#work">Portfolio</a><a href="#contact">Contact Us</a>
+      </nav>
+      <div class="foot-col">
+        <h2>Visit</h2>
+        <p>Mojorejo, Kec. Junrejo<br>Kota Batu, Jawa Timur 65322</p>
+        <a href="https://maps.app.goo.gl/mMN3CuisLAhA4bdY6" target="_blank" rel="noopener">Get directions</a>
+      </div>
+      <div class="foot-col">
+        <h2>Contact</h2>
+        <a href="mailto:anantabogacreativestudio@gmail.com">anantabogacreativestudio@gmail.com</a>
+      </div>
+    </div>
+    <div class="wrap foot-bottom">
+      <p>© 2026 Anantaboga Creative Studio. All rights reserved.</p>
+      <a href="#top">Back to top</a>
+    </div>
+  </footer>
+
+  <dialog class="player" id="player" aria-labelledby="player-title">
+    <div class="player-bar">
+      <div><h3 id="player-title"></h3><p class="player-meta"></p></div>
+      <button class="player-close" type="button" aria-label="Close film">×</button>
+    </div>
+    <div class="player-frame"></div>
+    <p class="player-alt">Film not loading? <a href="#" target="_blank" rel="noopener">Watch it on Google Drive</a></p>
+  </dialog>
+
+  <script src="js/script.js"></script>
+  <script type="module" src="js/hero/hero.js"></script>
 </body>
 </html>
