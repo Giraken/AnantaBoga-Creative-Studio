@@ -1,5 +1,6 @@
 // Scene: renderer, camera, the double orange ring, lights, bloom, intro timeline, the poster
-// planes (grid and headline), pointer tilt and eye tracking.
+// planes (grid and headline), pointer tilt and eye tracking, and the scroll exit (the dragon loops
+// away to the left while FORGED IN slides off left and LEGEND off right).
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -30,7 +31,8 @@ function ring(radius, thickness, glow, segs = 320) {
   return mesh;
 }
 
-export function startScene(host, { lite = false, still = false, root = host.parentElement } = {}) {
+// exit(): 0..1 scroll progress through the hero (0 at the top of the page)
+export function startScene(host, { lite = false, still = false, root = host.parentElement, exit = () => 0 } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: !lite, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2));
   renderer.setClearColor(0x000000, 1);
@@ -133,10 +135,10 @@ export function startScene(host, { lite = false, still = false, root = host.pare
     stage.position.set((cx - 0.5) * viewW, (0.5 - cy) * viewH, 0);
     stage.scale.setScalar(s);
     // Resizing clears the canvas; the still (reduced-motion) pose has no loop, so draw it again
-    if (still) requestAnimationFrame(() => render(0, 3));
+    if (still) requestAnimationFrame(() => render(0, 9));
   }
   let posterTimer = 0;
-  const rebuildPoster = () => { clearTimeout(posterTimer); posterTimer = setTimeout(() => poster.rebuild().then(() => { if (still) render(0, 3); }), 120); };
+  const rebuildPoster = () => { clearTimeout(posterTimer); posterTimer = setTimeout(() => poster.rebuild().then(() => { if (still) render(0, 9); }), 120); };
 
   // ---- Pointer: the head turns a little, the eyes follow the cursor ----
   const look = { x: 0, y: 0 }, aim = { x: 0, y: 0 };
@@ -171,9 +173,13 @@ export function startScene(host, { lite = false, still = false, root = host.pare
     }
   }
 
-  // Intro: ring draws in (0-0.9s), dragon coils in (0.4-2.0s), eyes ignite (2.0-2.5s)
+  // Intro: ring draws in (0-0.9s), the dragon rises from below the frame and coils round the ring into
+  // place (0.3-3.7s), eyes ignite as it settles (3.1-3.7s). The previous dragon coiled in faster.
   const seg = (t, a, b) => THREE.MathUtils.clamp((t - a) / (b - a), 0, 1);
   const ease = x => 1 - Math.pow(1 - x, 3);
+  const T_ARRIVE = classic ? [0.4, 2.0] : [0.3, 3.7], T_EYES = classic ? [2.0, 2.5] : [3.1, 3.7];
+  // Scroll exit, eased toward the scroll position so wheel steps don't jerk it
+  let leave = still ? 0 : exit(), lastT = 0;
   let sized = '';
   function render(t, introT) {
     // Keep camera and poster in step with the stage size, however it changed
@@ -185,16 +191,22 @@ export function startScene(host, { lite = false, still = false, root = host.pare
       const per = 8 * 6, n = Math.floor((r.userData.total / per) * ringP) * per;
       r.geometry.setDrawRange(0, n);
     }
-    const coil = seg(introT, 0.4, 2.0), eyes = ease(seg(introT, 2.0, 2.5));
+    const arrive = seg(introT, ...T_ARRIVE), eyes = ease(seg(introT, ...T_EYES));
+    const dt = THREE.MathUtils.clamp(t - lastT, 0, 0.1); lastT = t;
+    if (!still) leave += (exit() - leave) * (1 - Math.exp(-dt * 7));
+    if (Math.abs(leave) < 1e-4) leave = 0;
+    // The headline clears out over the first three quarters of the scroll, the dragon over all of it
+    const words = still ? 0 : THREE.MathUtils.smoothstep(leave / 0.75, 0, 1);
+    poster.slide(words);
     if (!still) updateAim(t); else eyeTarget.copy(camera.position);
     // Parallax: the dragon and ring tilt a few degrees with the pointer
     stage.rotation.y = BASE_TILT.y + look.x * 0.1;
     stage.rotation.x = BASE_TILT.x - look.y * 0.07;
-    dragon.update(t, coil, look, still, eyeTarget, active ? aim : null);
+    dragon.update(t, arrive, look, still, eyeTarget, active ? aim : null, leave);
     dragon.setEyes(eyes);
     eyeLight.intensity = eyes * 1.4;
     ringLight.intensity = ringP * 2.2;
-    if (particles) particles.update(t, ease(seg(introT, 1.2, 2.5)), s * renderer.getPixelRatio() * (h / 900));
+    if (particles) particles.update(t, ease(seg(introT, 1.2, classic ? 2.5 : 3.2)), s * renderer.getPixelRatio() * (h / 900));
     renderFrame();
   }
 
@@ -222,7 +234,7 @@ export function startScene(host, { lite = false, still = false, root = host.pare
   document.addEventListener('visibilitychange', () => (document.hidden ? pause() : play()));
 
   const ready = poster.rebuild().then(() => {
-    if (still) render(0, 3); // final pose, eyes lit, no particles
+    if (still) render(0, 9); // final pose, eyes lit, no particles
     else play();
     return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
   });

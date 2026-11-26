@@ -15,6 +15,16 @@
 }
 .hero-stage-wrap { position: absolute; inset: 0; }
 
+/* Scroll exit. On wide screens the hero stays pinned for --pin of scrolling while the dragon loops away
+   to the left and the headline slides apart (js/hero/overlay.js turns the scroll into --exit / --words);
+   then the page carries on. Phones and reduced motion scroll straight through, and so does the page
+   if the hero script never runs (it adds .is-live). */
+.hero-pin { position: relative; --pin: 70svh; }
+@media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+  .hero-pin.is-live { height: calc(clamp(680px, 100svh, 1100px) + var(--pin)); }
+  .hero-pin.is-live > .hero3d { position: sticky; top: min(0px, calc(100svh - clamp(680px, 100svh, 1100px))); }
+}
+
 /* Grid panels and the faint circles behind the dragon */
 .pg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 .pg-line { position: absolute; background: var(--grid); }
@@ -42,10 +52,13 @@
   height: auto; aspect-ratio: 1; transform: translate(-50%, -50%); transition: opacity .9s ease;
 }
 .hero3d.has-scene .hero3d-fallback { opacity: 0; }
+/* Without WebGL the still spins away to the left on scroll, like the dragon does */
+.hero3d.no-scene .hero3d-fallback { transform: translate(calc(-50% - var(--exit, 0) * 75vw), -50%) rotate(calc(var(--exit, 0) * -160deg)); }
 
-/* Headline: FORGED IN / LEGEND, with orange blocks behind it. Where the letters cross a
-   block they turn black: the text is clipped from a white fill with black rectangles that
-   sit exactly over the blocks (same percentages of the same box). */
+/* Headline: FORGED IN / LEGEND, one row each, with an orange block behind each row. Where the
+   letters cross a block they turn black: each row's text is clipped from a white fill with a black
+   rectangle that sits exactly over its block (same percentages of the same box). On scroll the
+   rows slide apart, FORGED IN off to the left and LEGEND off to the right. */
 .poster-head {
   position: absolute; z-index: 2; left: var(--edge); right: var(--edge); bottom: 76px;
   margin: 0; pointer-events: none;
@@ -53,17 +66,21 @@
   font-variation-settings: normal; /* let font-stretch drive the width axis (the canvas copy uses it too) */
   font-size: clamp(84px, min(16.5vw, 27vh), 300px); line-height: .84; letter-spacing: -.012em; text-transform: uppercase;
 }
+.ph-row { position: relative; display: block; }
+.ph-r1 { transform: translateX(calc(var(--words, 0) * (-100% - var(--edge)))); }
+.ph-r2 { transform: translateX(calc(var(--words, 0) * (100% + var(--edge)))); }
+.hero3d.is-measuring .ph-row { transform: none; } /* the 3D copy is painted from the unmoved layout */
 .poster-block { position: absolute; background: var(--orange); }
-.poster-block.pb1 { left: 0; top: 6%; width: 13%; height: 40%; }
-.poster-block.pb2 { left: 56%; top: 50%; width: 34%; height: 46%; }
+.poster-block.pb1 { left: 0; top: 12%; width: 13%; height: 80%; }
+.poster-block.pb2 { left: 56%; top: 0; width: 34%; height: 92%; }
 .ph-text {
   position: relative; display: block; color: transparent;
-  background-image: linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#fff, #fff);
-  background-size: 13% 40%, 34% 46%, 100% 100%;
-  background-position: 0% 10%, 84.85% 92.59%, 0 0;
+  background-image: linear-gradient(#000, #000), linear-gradient(#fff, #fff);
   background-repeat: no-repeat;
   -webkit-background-clip: text; background-clip: text;
 }
+.ph-r1 .ph-text { background-size: 13% 80%, 100% 100%; background-position: 0% 60%, 0 0; }
+.ph-r2 .ph-text { background-size: 34% 92%, 100% 100%; background-position: 84.85% 0%, 0 0; }
 .ph-line { display: block; width: fit-content; }
 .ph-line.ph-l2 { margin-left: auto; }
 .hero3d.has-scene .pg, .hero3d.has-scene .poster-block, .hero3d.has-scene .ph-text { opacity: 0; }

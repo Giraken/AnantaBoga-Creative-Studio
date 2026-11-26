@@ -1,13 +1,39 @@
-// UI overlay: staged text entrance and the swap from the static logo fallback to the live scene.
+// UI overlay: staged text entrance, the swap from the static logo fallback to the live scene, and the
+// scroll progress through the hero that drives the exit (the dragon loops away to the left, FORGED IN
+// slides off left, LEGEND off right).
 export function createOverlay(hero) {
   const fallback = hero.querySelector('.hero3d-fallback');
   const stageEl = hero.querySelector('.hero3d-stage');
+  const stageWrap = hero.querySelector('.hero-stage-wrap');
+  const pin = hero.closest('.hero-pin');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // The fallback is sized from the real section height, which is clamped in CSS
   const measure = () => hero.style.setProperty('--hero-h', hero.clientHeight + 'px');
   measure();
   window.addEventListener('resize', measure);
+
+  // Exit progress 0..1. On wide screens the hero is pinned (CSS) for a stretch of scrolling and the
+  // exit plays across it; on phones it plays over the first ~60% of the stage scrolling away.
+  let exit = 0;
+  pin?.classList.add('is-live');
+  const read = () => {
+    if (reduce) return 0;
+    const top = (pin || hero).getBoundingClientRect().top;
+    const span = pin ? pin.offsetHeight - hero.offsetHeight : 0;
+    const range = span > 40 ? span : stageWrap.offsetHeight * 0.6;
+    return Math.min(1, Math.max(0, -top / range));
+  };
+  const onScroll = () => {
+    exit = read();
+    // For the HTML copy of the headline and the still image (shown without WebGL)
+    const words = Math.min(1, exit / 0.75);
+    hero.style.setProperty('--exit', exit.toFixed(4));
+    hero.style.setProperty('--words', (words * words * (3 - 2 * words)).toFixed(4));
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
 
   // Text comes in on load whether or not WebGL is available
   requestAnimationFrame(() => hero.classList.add('is-in'));
@@ -23,6 +49,7 @@ export function createOverlay(hero) {
   return {
     reduce,
     stageEl,
+    exitProgress: () => exit,
     // Called once the scene has drawn its first frames
     showScene(canvas) {
       canvas.setAttribute('aria-hidden', 'true');

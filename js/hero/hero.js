@@ -18,7 +18,7 @@ if (hero) {
     if (!supportsWebGL()) return overlay.keepFallback();
     try {
       const { startScene } = await import('./scene.js');
-      const scene = startScene(overlay.stageEl, { lite, still: overlay.reduce });
+      const scene = startScene(overlay.stageEl, { lite, still: overlay.reduce, exit: overlay.exitProgress });
       await scene.ready;
       overlay.showScene(scene.canvas);
     } catch (err) {

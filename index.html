@@ -46,6 +46,8 @@
   </header>
 
   <main>
+    <!-- On wide screens the hero stays pinned for a stretch of scrolling while the dragon and headline leave -->
+    <div class="hero-pin">
     <section class="hero3d" id="top" aria-labelledby="hero-title">
       <div class="hero-stage-wrap">
         <div class="pg" aria-hidden="true">
@@ -58,8 +60,8 @@
         <div class="dragon-anchor" aria-hidden="true"></div>
         <h1 class="poster-head" id="hero-title">
           <span class="sr-only">Anantaboga Creative Studio: </span>
-          <span class="poster-block pb1" aria-hidden="true"></span><span class="poster-block pb2" aria-hidden="true"></span>
-          <span class="ph-text"><span class="ph-line">Forged in</span><span class="ph-line ph-l2">Legend</span></span>
+          <span class="ph-row ph-r1"><span class="poster-block pb1" aria-hidden="true"></span><span class="ph-text"><span class="ph-line">Forged in</span></span></span>
+          <span class="ph-row ph-r2"><span class="poster-block pb2" aria-hidden="true"></span><span class="ph-text"><span class="ph-line ph-l2">Legend</span></span></span>
         </h1>
         <p class="pg-label lb1">[2026]</p>
         <p class="pg-label lb2">[Video &amp; photo]</p>
@@ -83,6 +85,7 @@
         </div>
       </div>
     </section>
+    </div>
 
     <section class="clients" aria-labelledby="clients-title">
       <div class="wrap">

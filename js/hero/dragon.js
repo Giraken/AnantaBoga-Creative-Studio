@@ -1,13 +1,17 @@
-// The imperial dragon (Anantaboga) in a double-looping S threaded through the ring. Built like the logo: a heavy scaled body coiled
-// around the ring, a scowling roaring head with beard and mane, and two clawed front legs
-// (one raised toward the viewer, one gripping the ring). The body skin and the legs are
-// re-solved every frame so breathing, coiling and the load-in are real geometry.
+// The imperial dragon (Anantaboga) threaded through the ring, built like the logo: a heavy scaled body,
+// a scowling roaring head with beard and mane, and two clawed front legs at the top of the arch, one each
+// side, both reaching toward the viewer. The body slides along a track (spine.js): it rises from below
+// the frame and coils into place, and on scroll loops away to the left, never passing through the ring or
+// itself. The body skin, the head on the end of the neck and the legs are re-solved every frame.
 import * as THREE from 'three';
+import { REST, createTrack, createSolver, bodyRadius, bodyFrames, headBasis, HEAD_TILT, HEAD_SPHERES, HEAD_DOWN } from './spine.js';
 
 const ORANGE = new THREE.Color('#F7991F');
 const GRAY = new THREE.Color('#7A7A7A');
 const LIGHT_GRAY = new THREE.Color('#A0A0A0');
 const BONE = new THREE.Color('#E8E2D6');
+const UP_X = new THREE.Vector3(1, 0, 0);
+const VIEW = new THREE.Vector3(0, 0, 1); // toward the viewer
 const smooth = THREE.MathUtils.smoothstep;
 
 // ---------- Engraved scale texture: height -> normal map + cavity (AO) map ----------
@@ -74,7 +78,7 @@ function scaleMaterial(maps, { repeat = [1, 1], color = '#ffffff', rim = 0.75, v
   const map = maps.cavity.clone(); map.repeat.set(...repeat); map.needsUpdate = true;
   return rimify(new THREE.MeshStandardMaterial({
     color, map, normalMap, normalScale: new THREE.Vector2(normal, normal),
-    metalness: 0.5, roughness: 0.68, envMapIntensity: 0.4, vertexColors, transparent: true,
+    metalness: 0.5, roughness: 0.68, envMapIntensity: 0.4, vertexColors,
   }), rim);
 }
 
@@ -122,6 +126,11 @@ function tuftGeometry(radial, flame = false) {
 }
 
 // ---------- Head ----------
+// Forward is +Z, up is +Y. The origin is the nape, where the neck enters: the neck comes in from behind
+// and above along NAPE (tipped by HEAD_TILT), so the back of the skull is built around that axis and the
+// neck runs straight into it.
+const NAPE = new THREE.Vector3(0, Math.sin(HEAD_TILT), -Math.cos(HEAD_TILT));
+const UP = new THREE.Vector3(0, 1, 0);
 function buildHead(mats, lite) {
   const head = new THREE.Group();
   const SEG = lite ? 16 : 26;
@@ -130,10 +139,13 @@ function buildHead(mats, lite) {
     const m = new THREE.Mesh(geo, mat); m.scale.set(...s); m.position.set(...p); m.rotation.set(...r); parent.add(m); return m;
   };
   const blob = (s, p, r, mat = mats.skin, parent = head) => add(parent, sphere, mat, s, p, r);
+  // Back of the skull: two swellings along the neck axis, so the neck widens into the head
+  const nape = (s, d, lift = 0) => blob(s, [0, NAPE.y * d + lift, NAPE.z * d], [HEAD_TILT, 0, 0]);
+  nape([0.19, 0.17, 0.2], 0.07);
+  nape([0.15, 0.135, 0.19], 0.22);
+  blob([0.15, 0.11, 0.17], [0, -0.1, -0.1], [-0.35, 0, 0]); // throat: from under the jaw hinge into the neck
 
-  // Skull, jowls, long snout and flat nose pad (forward is +Z, up is +Y)
-  blob([0.2, 0.2, 0.26], [0, 0.0, -0.2]);   // nape and throat: blends the skull into the neck
-  blob([0.17, 0.17, 0.22], [0, -0.03, -0.38]);
+  // Skull, jowls, long snout and flat nose pad
   blob([0.27, 0.22, 0.3], [0, 0.05, -0.03]);
   blob([0.24, 0.16, 0.22], [0, -0.04, 0.05]);
   blob([0.15, 0.1, 0.32], [0, 0.02, 0.33]);
@@ -141,7 +153,6 @@ function buildHead(mats, lite) {
   // Wrinkled snout: ridges across the bridge
   for (let k = 0; k < 4; k++) blob([0.13 - k * 0.01, 0.02, 0.026], [0, 0.112 - k * 0.006, 0.2 + k * 0.08], [0.1, 0, 0]);
   // Flared nostrils
-  const ring = new THREE.TorusGeometry(1, 0.42, 8, lite ? 10 : 16);
   for (const s of [-1, 1]) {
     blob([0.033, 0.022, 0.045], [s * 0.06, 0.075, 0.58], [0.2, 0, s * 0.35]); // flared nostril wing
     blob([0.026, 0.01, 0.03], [s * 0.07, 0.11, 0.625], [0.4, 0, s * 0.35], mats.dark);
@@ -219,19 +230,27 @@ function buildHead(mats, lite) {
     const m = add(cheeks, tuft, mats.hair, [0.05, 0.32 + (k % 2) * 0.12, 0.03], [s * (0.21 + u * 0.04), 0.12 - u * 0.26, 0.06 - u * 0.14], [-2.05 + u * 0.45, 0, s * (0.9 + u * 0.5)]);
     m.userData.base = m.rotation.z;
   }
-  // Mane: tufts around the back of the skull, flowing back
+  // Mane: a collar of tufts round the top and sides of the nape, flowing back along the neck, so the
+  // join between head and neck sits under hair
   const mane = new THREE.Group(); head.add(mane);
-  const maneN = lite ? 8 : 16;
+  const maneN = lite ? 9 : 18;
+  const across = new THREE.Vector3(0, Math.cos(HEAD_TILT), Math.sin(HEAD_TILT)); // up, square to the neck
   for (let k = 0; k < maneN; k++) {
-    const a = -1.5 + (k / (maneN - 1)) * 3.0;
-    const m = add(mane, tuft, mats.hair, [0.05, 0.2 + (k % 2) * 0.07, 0.035], [Math.sin(a) * 0.2, Math.cos(a) * 0.15 + 0.02, -0.18], [-1.95 + Math.abs(a) * 0.1, 0, -a * 0.75]);
-    m.userData.base = m.rotation.z;
+    const a = -1.85 + (k / (maneN - 1)) * 3.7; // 0 = top of the neck
+    const out = new THREE.Vector3(Math.sin(a), 0, 0).addScaledVector(across, Math.cos(a));
+    const m = new THREE.Mesh(tuft, mats.hair);
+    m.scale.set(0.05, 0.22 + (k % 2) * 0.08 + Math.cos(a) * 0.05, 0.035);
+    m.position.copy(NAPE).multiplyScalar(0.1 + (k % 2) * 0.05).addScaledVector(out, 0.15);
+    m.quaternion.setFromUnitVectors(UP, NAPE.clone().addScaledVector(out, 0.45).normalize());
+    m.userData.q0 = m.quaternion.clone();
+    mane.add(m);
   }
   return { head, eyes, eyeballs, jaw, beard, mane, cheeks };
 }
 
 // ---------- Leg: a smooth muscular limb swept from inside the chest to the wrist, ending in a
-// dragon foot: three long forward toes and a dewclaw, each a bony chain tipped with a hooked talon ----------
+// dragon hand: four long forward fingers and a shorter thumb, all pointing forward, each a bony chain
+// tipped with a hooked talon ----------
 function buildLeg(mats, lite) {
   const g = new THREE.Group();
   const N = lite ? 18 : 30, RADIAL = lite ? 10 : 16;
@@ -264,15 +283,15 @@ function buildLeg(mats, lite) {
     return profile[profile.length - 1][1];
   };
 
-  // Foot: sole faces +Z, toes point +Y; curling a toe bends it toward the sole
+  // Hand: palm faces +Z, fingers point +Y; curling a finger bends it toward the palm
   const SEG = lite ? 8 : 14;
   const sphere = new THREE.SphereGeometry(1, SEG, Math.round(SEG * 0.7));
   const foot = new THREE.Group(); g.add(foot);
-  const pad = new THREE.Mesh(sphere, mats.toe); pad.scale.set(0.09, 0.085, 0.05); pad.position.y = 0.04; foot.add(pad);
+  const pad = new THREE.Mesh(sphere, mats.toe); pad.scale.set(0.095, 0.085, 0.05); pad.position.y = 0.04; foot.add(pad);
   const bone = new THREE.CylinderGeometry(0.017, 0.023, 1, lite ? 6 : 9); bone.translate(0, 0.5, 0);
   const talon = sweep([[0, 0, 0], [0, 0.07, 0.008], [0, 0.13, 0.04], [0, 0.165, 0.095], [0, 0.16, 0.15]], taper(0.03, 0.002), lite ? 10 : 18, lite ? 6 : 9);
   const toes = [];
-  const makeToe = (x, y, spread, lens, dew) => {
+  const makeToe = (x, y, spread, lens, thumb) => {
     const root = new THREE.Group(); root.position.set(x, y, 0.012); root.rotation.z = -spread; foot.add(root);
     let parent = root;
     const joints = [];
@@ -283,21 +302,22 @@ function buildLeg(mats, lite) {
       joints.push(parent); parent = next;
     });
     parent.add(new THREE.Mesh(talon, mats.talon));
-    if (dew) parent.scale.setScalar(0.85);
-    toes.push({ joints, dew });
+    if (thumb) root.scale.setScalar(0.88);
+    toes.push({ joints, thumb });
   };
-  makeToe(-0.07, 0.1, 0.6, [0.12, 0.1], false);
-  makeToe(-0.024, 0.114, 0.2, [0.14, 0.115], false);
-  makeToe(0.024, 0.114, -0.2, [0.14, 0.115], false);
-  makeToe(0.07, 0.1, -0.6, [0.12, 0.1], false);
-  // Dewclaw: a thumb-like toe set low on the inner side, opposing the three
-  makeToe(-0.085, -0.02, 2.2, [0.08], true);
+  makeToe(-0.068, 0.1, 0.5, [0.12, 0.1], false);
+  makeToe(-0.023, 0.114, 0.17, [0.14, 0.115], false);
+  makeToe(0.023, 0.114, -0.17, [0.14, 0.115], false);
+  makeToe(0.068, 0.1, -0.5, [0.12, 0.1], false);
+  // Thumb: the fifth finger, set lower on the inner edge of the palm, pointing forward with the rest
+  makeToe(-0.095, 0.045, 0.62, [0.1, 0.085], true);
 
   const tmp = new THREE.Vector3(), ref = new THREE.Vector3(), Nv = new THREE.Vector3(), Bv = new THREE.Vector3(), basis = new THREE.Matrix4();
+  const zf = new THREE.Vector3(), xf = new THREE.Vector3(), out = new THREE.Vector3(), out2 = new THREE.Vector3();
   const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()], false, 'centripetal');
   return {
     group: g,
-    // root inside the body, S shoulder, E elbow, W wrist; toeDir and soleNormal orient the foot; curl 0 open .. 1.4 closed
+    // root inside the body, S shoulder, E elbow, W wrist; toeDir and soleNormal orient the hand; curl 0 open .. 1.4 closed
     pose(root, S, E, W, toeDir, soleNormal, curl, scale) {
       curve.points[0].copy(root); curve.points[1].copy(S); curve.points[2].copy(E); curve.points[3].copy(W);
       const r0 = 0.1 * scale;
@@ -314,15 +334,15 @@ function buildLeg(mats, lite) {
         }
       }
       geo.attributes.position.needsUpdate = true; geo.attributes.normal.needsUpdate = true;
-      const z = soleNormal.clone().addScaledVector(toeDir, -soleNormal.dot(toeDir)).normalize();
-      const x = new THREE.Vector3().crossVectors(toeDir, z).normalize();
-      basis.makeBasis(x, toeDir, z);
+      zf.copy(soleNormal).addScaledVector(toeDir, -soleNormal.dot(toeDir)).normalize();
+      xf.crossVectors(toeDir, zf).normalize();
+      basis.makeBasis(xf, toeDir, zf);
       foot.quaternion.setFromRotationMatrix(basis);
       foot.position.copy(W); foot.scale.setScalar(scale * 2.1);
       // Elbow tuft points out of the bend, away from both bones
-      const out = E.clone().sub(W).normalize().add(E.clone().sub(S).normalize()).normalize();
-      elbowTufts.position.copy(E); elbowTufts.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), out); elbowTufts.scale.setScalar(scale);
-      for (const t of toes) t.joints.forEach((j, k) => { j.rotation.x = curl * (t.dew ? 0.55 : (k === 0 ? 0.5 : 0.85)); });
+      out.copy(E).sub(W).normalize().add(out2.copy(E).sub(S).normalize()).normalize();
+      elbowTufts.position.copy(E); elbowTufts.quaternion.setFromUnitVectors(UP, out); elbowTufts.scale.setScalar(scale);
+      for (const t of toes) t.joints.forEach((j, k) => { j.rotation.x = curl * (t.thumb ? 0.6 : (k === 0 ? 0.5 : 0.85)); });
     },
   };
 }
@@ -343,29 +363,28 @@ function solveElbow(S, T, a, b, pole) {
 export function createDragon({ lite = false } = {}) {
   const L = lite ? 150 : 260;      // rings along the body
   const RAD = lite ? 14 : 24;      // vertices around the body
-  const R = 2.0;                   // ring radius the body coils around
-  const COIL = 0.52, TURNS = 1.6, SPAN = Math.PI * 1.5, THETA_END = Math.PI * 0.62, NECK = 0.78;
+  const M = lite ? 64 : 96;        // collision nodes along the body
   const HEAD_SCALE = 2.4;
+  const NECK_BASE = 0.86, NAPE_BEND = 0.95, NECK_SHARE = 0.6; // a head turn: 60% bends the neck, the rest the nape
+  const FRONT = 0.85;              // where the front legs join the body: the top of the arch, just behind the neck
 
   const maps = scaleMaps(lite ? 128 : 256);
   const mats = {
     body: scaleMaterial(maps, { repeat: lite ? [30, 4] : [46, 6], vertexColors: true }),
     skin: scaleMaterial(maps, { repeat: [5, 4], color: '#6a6a6a', normal: 1.2 }),
-    horn: rimify(new THREE.MeshStandardMaterial({ color: '#7A7A7A', metalness: 0.45, roughness: 0.55, envMapIntensity: 0.35, transparent: true }), 0.35),
-    whisker: rimify(new THREE.MeshStandardMaterial({ color: '#7d7d7d', metalness: 0.35, roughness: 0.6, transparent: true }), 0.45),
-    hair: rimify(new THREE.MeshStandardMaterial({ color: '#9a9a9a', vertexColors: true, metalness: 0.25, roughness: 0.85, transparent: true }), 0.3),
-    tooth: new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.05, roughness: 0.38, transparent: true }),
-    talon: rimify(new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.1, roughness: 0.32, transparent: true }), 0.4),
+    horn: rimify(new THREE.MeshStandardMaterial({ color: '#7A7A7A', metalness: 0.45, roughness: 0.55, envMapIntensity: 0.35 }), 0.35),
+    hair: rimify(new THREE.MeshStandardMaterial({ color: '#9a9a9a', vertexColors: true, metalness: 0.25, roughness: 0.85 }), 0.3),
+    tooth: new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.05, roughness: 0.38 }),
+    talon: rimify(new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.1, roughness: 0.32 }), 0.4),
     limb: scaleMaterial(maps, { repeat: [7, 3], color: '#6a6a6a', normal: 1.3 }),
     toe: scaleMaterial(maps, { repeat: [3, 3], color: '#626262', normal: 1.6 }),
-    sclera: new THREE.MeshStandardMaterial({ color: '#1a0e05', roughness: 0.35, metalness: 0.1, transparent: true }),
-    tongue: new THREE.MeshStandardMaterial({ color: '#7e3328', roughness: 0.55, transparent: true }),
-    mouth: new THREE.MeshStandardMaterial({ color: '#0e0603', roughness: 0.95, transparent: true }),
-    dark: new THREE.MeshBasicMaterial({ color: '#000000', transparent: true }),
-    eye: new THREE.MeshBasicMaterial({ color: ORANGE.clone(), toneMapped: false, transparent: true }),
-    fin: rimify(new THREE.MeshStandardMaterial({ color: '#5a5a5a', metalness: 0.5, roughness: 0.6, envMapIntensity: 0.4, flatShading: true, transparent: true }), 0.7),
+    sclera: new THREE.MeshStandardMaterial({ color: '#1a0e05', roughness: 0.35, metalness: 0.1 }),
+    tongue: new THREE.MeshStandardMaterial({ color: '#7e3328', roughness: 0.55 }),
+    mouth: new THREE.MeshStandardMaterial({ color: '#0e0603', roughness: 0.95 }),
+    dark: new THREE.MeshBasicMaterial({ color: '#000000' }),
+    eye: new THREE.MeshBasicMaterial({ color: ORANGE.clone(), toneMapped: false }),
+    fin: rimify(new THREE.MeshStandardMaterial({ color: '#5a5a5a', metalness: 0.5, roughness: 0.6, envMapIntensity: 0.4, flatShading: true }), 0.7),
   };
-  const fadeable = Object.values(mats);
 
   // ---- Body buffers (index built once, positions rewritten per frame) ----
   const count = (L + 1) * (RAD + 1);
@@ -395,13 +414,10 @@ export function createDragon({ lite = false } = {}) {
     }
   }
 
-  // Radius: gradual tail, the most mass at chest and neck root, slightly slimmer behind the head
-  const state = { coil: 1, theta: 0, phase: 0.9, sway: 0, breath: 0, snarl: 0, flex: 0 };
-  const radiusAt = s => {
-    const base = 0.04 + 0.2 * smooth(s, 0, 0.38);
-    const chest = 0.036 * Math.exp(-Math.pow((s - 0.72) / 0.1, 2)) * (1 + state.breath * 0.7);
-    return (base + chest) * 1.1 * (1 - 0.04 * smooth(s, 0.9, 1));
-  };
+  // arrive: eased intro progress along the track; leave: scroll exit progress; settle: 1 when coiled in
+  // place (idle motion, cursor turn and leg pose fade in with it)
+  const state = { sway: 0, breath: 0, snarl: 0, flex: 0, arrive: 1, leave: 0, settle: 1, legs: 1 };
+  const radiusAt = s => bodyRadius(s, state.breath);
 
   // Dorsal plates: short, thick, jagged triangles
   const FINS = lite ? 26 : 46;
@@ -418,8 +434,7 @@ export function createDragon({ lite = false } = {}) {
 
   const { head, eyes, eyeballs, jaw, beard, mane, cheeks } = buildHead(mats, lite);
   head.scale.setScalar(HEAD_SCALE);
-  const headPivot = new THREE.Group(); headPivot.add(head);
-  const headRoot = new THREE.Group(); headRoot.add(headPivot); headRoot.matrixAutoUpdate = false;
+  const headRoot = new THREE.Group(); headRoot.add(head); headRoot.matrixAutoUpdate = false;
 
   const tuftG = tuftGeometry(lite ? 4 : 6, true);
   // Flame-shaped fan at the tail tip
@@ -433,77 +448,113 @@ export function createDragon({ lite = false } = {}) {
   // Small fin tufts along both sides of the tail
   const TAILF = lite ? 6 : 14;
   const tailFins = new THREE.InstancedMesh(tuftG, mats.hair, TAILF); tailFins.frustumCulled = false;
-  // Four legs: front raised + front grip, rear grip + rear trailing
-  const raised = buildLeg(mats, lite), grip = buildLeg(mats, lite), rearGrip = buildLeg(mats, lite), rearTrail = buildLeg(mats, lite);
+  // Two front legs, one each side of the chest just behind the neck, both reaching toward the viewer
+  const nearLeg = buildLeg(mats, lite), farLeg = buildLeg(mats, lite);
 
   const group = new THREE.Group();
-  group.add(body, fins, neckMane, headRoot, raised.group, grip.group, rearGrip.group, rearTrail.group, tailFan, tailFins);
+  group.add(body, fins, neckMane, headRoot, nearLeg.group, farLeg.group, tailFan, tailFins);
 
-  // ---- Path: a double-looping S threaded through the ring ----
-  // Hand-placed spine, tail (lower-left) to head (upper-left): the body sweeps along the bottom
-  // in front of the ring, rises behind it on the right, coils in through the centre into a lower
-  // loop, climbs into a large arch over the top in front of the ring, and the neck descends to
-  // the head, which leans down toward the viewer. The z values alternate where the body crosses
-  // the ring's circle, so it passes in front of the ring in some places and behind it in others.
+  // ---- Spine: the track the body slides along, and the collision solver ----
+  const track = createTrack();
+  const Lb = track.restLength;
+  const solve = createSolver(M, Lb);
+  const nodeS = Float32Array.from({ length: M }, (_, i) => i / (M - 1));
+  const nodeR = nodeS.map(s => bodyRadius(s));
+  const Q = [], disp = [], Pn = [];
+  for (let i = 0; i < M; i++) { Q.push(new THREE.Vector3()); disp.push(new THREE.Vector3()); Pn.push(new THREE.Vector3()); }
+  const headCol = { offsets: HEAD_SPHERES.map(() => new THREE.Vector3()), side: 1 };
   const P = [], T = [], D = [], B = [];
   for (let i = 0; i <= L; i++) { P.push(new THREE.Vector3()); T.push(new THREE.Vector3()); D.push(new THREE.Vector3()); B.push(new THREE.Vector3()); }
-  const v = new THREE.Vector3(), core = new THREE.Vector3();
-  const m4 = new THREE.Matrix4(), down = new THREE.Vector3(0, -1, 0.25).normalize();
-  const faceDir = new THREE.Vector3(-0.4, -0.3, 1).normalize();
-  const turn = { headYaw: 0, headPitch: 0, neckYaw: 0, neckPitch: 0 };
-  const NECK_BASE = 0.86, neckQ = new THREE.Quaternion(), neckE = new THREE.Euler(), pivot = new THREE.Vector3();
-  const KEYS = [
-    [-3.05, -2.55, 0.35], [-2.1, -2.45, 0.6], [-0.7, -2.45, 0.85], [0.8, -2.15, 0.6], [1.95, -1.4, -0.45],
-    [2.45, -0.3, -0.65], [2.05, 0.65, -0.35], [1.0, 0.75, 0.35], [-0.05, 0.15, 0.75], [-0.35, -0.85, 0.45],
-    [0.45, -1.3, -0.35], [1.55, -0.55, -0.7], [2.45, 0.85, -0.45], [2.05, 2.05, 0.45], [0.75, 2.75, 0.6],
-    [-0.6, 2.55, 0.75], [-1.65, 2.25, 1.0], [-2.25, 1.85, 1.35], [-2.15, 1.35, 1.8],
-  ].map(k => new THREE.Vector3(k[0] + 0.35, k[1], k[2])); // shifted so the whole sculpture centres on the ring
-  const spine = new THREE.CatmullRomCurve3(KEYS.map(k => k.clone()), false, 'centripetal');
-  function updateSpine() {
-    // Intro: the body unfurls from a smaller, rotated pose; idle: a slow ripple along the coils
-    const e = THREE.MathUtils.clamp((state.coil - 0.2) / 0.8, 0, 1);
-    const ang = (1 - e) * -0.9, sc = 0.55 + 0.45 * e, c = Math.cos(ang), sn = Math.sin(ang);
-    KEYS.forEach((k, i) => {
-      const x = k.x * sc, y = k.y * sc;
-      const ripple = Math.sin(state.sway * 0.45 + i * 0.9) * 0.06 * (i === KEYS.length - 1 ? 0 : 1);
-      spine.points[i].set(x * c - y * sn, x * sn + y * c, k.z * sc + ripple);
-    });
-    const h = spine.points[KEYS.length - 1];
-    h.x += Math.sin(state.sway * 0.5) * 0.04; h.y += Math.sin(state.sway * 0.7) * 0.05;
-    spine.updateArcLengths();
-  }
 
-  function rebuild(t, look) {
-    updateSpine();
-    for (let i = 0; i <= L; i++) spine.getPointAt(i / L, P[i]);
-    // The top of the neck rotates progressively toward the cursor (roughly 10/15/25/40% of the
-    // head's turn per segment, accumulating along the neck), so the head is carried, not swivelled
-    const i0 = Math.round(NECK_BASE * L); pivot.copy(P[i0]);
-    for (let i = i0 + 1; i <= L; i++) {
-      const w = Math.pow((i - i0) / (L - i0), 1.6) * 0.6;
-      neckE.set(-turn.neckPitch * w, turn.neckYaw * w, 0); neckQ.setFromEuler(neckE);
-      P[i].sub(pivot).applyQuaternion(neckQ).add(pivot);
+  const v = new THREE.Vector3(), tmp = new THREE.Vector3(), m4 = new THREE.Matrix4();
+  const hx = new THREE.Vector3(), hy = new THREE.Vector3(), hz = new THREE.Vector3(), tA = new THREE.Vector3(), dA = new THREE.Vector3();
+  const pivot = new THREE.Vector3(), joint = new THREE.Vector3(), headDown = new THREE.Vector3();
+  const qId = new THREE.Quaternion(), qNeck = new THREE.Quaternion(), qHead = new THREE.Quaternion(), qT = new THREE.Quaternion(), eul = new THREE.Euler();
+  const TRAVEL_DOWN = new THREE.Vector3(0, -0.3, -1).normalize(); // flying, the back faces the viewer
+  // Front claws at rest: where each wrist reaches from its shoulder (in leg lengths), where its fingers
+  // point, which way its palm faces and which way its elbow bends
+  const CLAW_NEAR = new THREE.Vector3(-0.55, -0.45, 1.0), CLAW_FAR = new THREE.Vector3(0.5, -0.6, 0.95);
+  const TOES_NEAR = new THREE.Vector3(-0.45, 0.8, 0.5).normalize(), TOES_FAR = new THREE.Vector3(0.45, 0.8, 0.5).normalize();
+  const PALM_NEAR = new THREE.Vector3(-0.2, -0.35, 1).normalize(), PALM_FAR = new THREE.Vector3(0.2, -0.35, 1).normalize();
+  const POLE_NEAR = new THREE.Vector3(0.4, -0.7, 0.1), POLE_FAR = new THREE.Vector3(-0.2, -0.8, -0.3);
+  const turn = { yaw: 0, pitch: 0 };
+  let turning = false, trackStill = false, F_SIDE = 1;
+
+  // Bend the neck toward the cursor: from its base, then the last stretch into the head, so the head is
+  // carried on the neck and the nape stays seated in the skull
+  const bend = (p, s, nape = true) => {
+    if (!turning || s <= NECK_BASE) return p;
+    qT.slerpQuaternions(qId, qNeck, smooth(s, NECK_BASE, 1));
+    p.sub(pivot).applyQuaternion(qT).add(pivot);
+    if (nape && s > NAPE_BEND) { qT.slerpQuaternions(qId, qHead, smooth(s, NAPE_BEND, 1)); p.sub(joint).applyQuaternion(qT).add(joint); }
+    return p;
+  };
+  // Uniform Catmull-Rom between b and c
+  const catmull = (a, b, c, d, w, out) => {
+    const w2 = w * w, w3 = w2 * w;
+    return out.set(
+      0.5 * (2 * b.x + (c.x - a.x) * w + (2 * a.x - 5 * b.x + 4 * c.x - d.x) * w2 + (3 * b.x - a.x - 3 * c.x + d.x) * w3),
+      0.5 * (2 * b.y + (c.y - a.y) * w + (2 * a.y - 5 * b.y + 4 * c.y - d.y) * w2 + (3 * b.y - a.y - 3 * c.y + d.y) * w3),
+      0.5 * (2 * b.z + (c.z - a.z) * w + (2 * a.z - 5 * b.z + 4 * c.z - d.z) * w2 + (3 * b.z - a.z - 3 * c.z + d.z) * w3));
+  };
+  // How far a plate can stick out from o along d before it would pierce another stretch of the body
+  const plateRoom = (o, d, len, s) => {
+    let best = len;
+    for (let j = 0; j < M; j++) {
+      if (Math.abs(nodeS[j] - s) * Lb < 1.4) continue;
+      const rr = nodeR[j] + 0.03, ox = o.x - Pn[j].x, oy = o.y - Pn[j].y, oz = o.z - Pn[j].z;
+      const b = ox * d.x + oy * d.y + oz * d.z, cc = ox * ox + oy * oy + oz * oz - rr * rr;
+      if (b > 0 && cc > 0) continue;
+      const disc = b * b - cc;
+      if (disc <= 0) continue;
+      best = Math.min(best, Math.max(0, -b - Math.sqrt(disc)));
     }
-    // Body frame carried from the tail without twisting; the belly starts facing down and turns
-    // down again behind the head
-    for (let i = 0; i <= L; i++) T[i].subVectors(P[Math.min(L, i + 1)], P[Math.max(0, i - 1)]).normalize();
-    // The back (dorsal spikes, mane) faces up and away from the ring centre, a little toward the
-    // viewer; the belly faces the opposite way. The frame follows that target smoothly along the body.
-    const want = new THREE.Vector3(), outv = new THREE.Vector3();
+    return Math.max(len * 0.12, best);
+  };
+
+  function rebuild(t) {
+    const st = state.settle;
+    // Idle: a slow ripple along the coils and a little head bob, only while coiled in place
+    if (st > 0 || !trackStill) {
+      track.update(st > 0 ? (k, key) => {
+        if (k === REST.length - 1) { key.x += Math.sin(state.sway * 0.5) * 0.04 * st; key.y += Math.sin(state.sway * 0.7) * 0.05 * st; }
+        else key.z += Math.sin(state.sway * 0.45 + k * 0.9) * 0.06 * st;
+      } : null);
+      trackStill = st === 0;
+    }
+    // The head's place on the track: up from below the frame into the coil, then on along the exit loop
+    const mk = track.marks;
+    const u = mk.gateIn + (mk.restEnd - mk.gateIn) * state.arrive + (mk.gateOut + Lb - mk.restEnd) * state.leave;
+    const at = (s, out) => track.pointAt(u - Lb * (1 - s), out);
+
+    const yaw = turn.yaw * st, pitch = turn.pitch * st, rear = state.snarl * 0.12 * st;
+    turning = Math.abs(yaw) + Math.abs(pitch) + rear > 1e-4;
+    if (turning) {
+      at(NECK_BASE, pivot);
+      qNeck.setFromEuler(eul.set(-pitch * NECK_SHARE, yaw * NECK_SHARE, 0));
+      qHead.setFromEuler(eul.set(-pitch * (1 - NECK_SHARE) - rear, yaw * (1 - NECK_SHARE), 0));
+      bend(at(1, joint), 1, false);
+    }
+    for (let i = 0; i < M; i++) bend(at(nodeS[i], Q[i]), nodeS[i]);
+    for (let i = 0; i <= L; i++) bend(at(i / L, P[i]), i / L);
+
+    // Collisions: the body against the ring and itself, the head (placed on the neck end) against both
+    headDown.copy(TRAVEL_DOWN).lerp(HEAD_DOWN, st).normalize();
+    tA.subVectors(Q[M - 1], Q[M - 2]).normalize();
+    dA.copy(headDown).addScaledVector(tA, -headDown.dot(tA));
+    if (dA.lengthSq() < 1e-6) dA.set(0, 0, -1).addScaledVector(tA, -tA.z);
+    headBasis(tA, dA.normalize(), hx, hy, hz);
+    HEAD_SPHERES.forEach(([x, y, z], k) => headCol.offsets[k].set(0, 0, 0).addScaledVector(hx, x).addScaledVector(hy, y).addScaledVector(hz, z));
+    headCol.side = Math.sign(Q[M - 1].z) || 1;
+    solve(Q, nodeR, nodeS, headCol, disp);
+    for (let i = 0; i < M; i++) Pn[i].copy(Q[i]).add(disp[i]);
+    // Spread the corrections smoothly over every ring of the skin
     for (let i = 0; i <= L; i++) {
-      outv.set(P[i].x, P[i].y, 0); if (outv.lengthSq() > 1e-6) outv.normalize();
-      want.set(0, 1, 0).addScaledVector(outv, 0.8).add(new THREE.Vector3(0, 0, 0.25)).negate();
-      want.addScaledVector(T[i], -want.dot(T[i]));
-      if (want.lengthSq() < 1e-4) want.copy(i ? D[i - 1] : new THREE.Vector3(0, -1, 0));
-      want.normalize();
-      if (i === 0) { D[0].copy(want); continue; }
-      D[i].copy(D[i - 1]).addScaledVector(T[i], -D[i - 1].dot(T[i])).normalize().lerp(want, 0.12).normalize();
+      const f = (i / L) * (M - 1), k = Math.min(M - 2, Math.floor(f));
+      P[i].add(catmull(disp[Math.max(0, k - 1)], disp[k], disp[k + 1], disp[Math.min(M - 1, k + 2)], f - k, tmp));
     }
-    for (let i = 0; i <= L; i++) {
-      const w = smooth(i / L, 0.9, 0.99);
-      if (w > 0) D[i].lerp(down, w).addScaledVector(T[i], -D[i].dot(T[i])).normalize();
-      B[i].crossVectors(T[i], D[i]).normalize();
-    }
+    bodyFrames(P, T, D, B, headDown);
+
     for (let i = 0; i <= L; i++) {
       const r = radiusAt(i / L);
       for (let j = 0; j <= RAD; j++) {
@@ -516,7 +567,8 @@ export function createDragon({ lite = false } = {}) {
     bodyGeo.attributes.position.needsUpdate = true;
     bodyGeo.attributes.normal.needsUpdate = true;
 
-    // Dorsal plates on the back, raked toward the tail, alternating heights for a jagged ridge
+    // Dorsal plates on the back, raked toward the tail, alternating heights for a jagged ridge. Where a
+    // plate would reach into another coil it folds down short instead.
     const dir = new THREE.Vector3(), z = new THREE.Vector3(), base = new THREE.Vector3();
     for (let f = 0; f < FINS; f++) {
       const s = 0.06 + (f / (FINS - 1)) * 0.86, i = Math.round(s * L), r = radiusAt(s);
@@ -524,7 +576,8 @@ export function createDragon({ lite = false } = {}) {
       z.crossVectors(B[i], dir).normalize();
       base.copy(P[i]).addScaledVector(D[i], -r * 0.86);
       const k = 1.6 * Math.max(0.35, r / 0.2) * (f % 2 ? 0.85 : 1);
-      m4.makeBasis(B[i].clone().multiplyScalar(0.45 * k), dir.clone().multiplyScalar(k), z.multiplyScalar(k)).setPosition(base);
+      const h = plateRoom(base, dir, 0.24 * k, s) / (0.24 * k);
+      m4.makeBasis(B[i].clone().multiplyScalar(0.45 * k), dir.clone().multiplyScalar(k * h), z.multiplyScalar(k * (0.4 + 0.6 * h))).setPosition(base);
       fins.setMatrixAt(f, m4);
     }
     fins.instanceMatrix.needsUpdate = true;
@@ -552,105 +605,93 @@ export function createDragon({ lite = false } = {}) {
       tailFins.setMatrixAt(n, m4);
     }
     tailFins.instanceMatrix.needsUpdate = true;
-    const tOut = T[0].clone().negate();
-    tailFan.matrix.makeBasis(B[0], tOut, new THREE.Vector3().crossVectors(B[0], tOut).normalize()).setPosition(P[0]);
+    // While travelling the fan opens toward the viewer, so it never shows edge-on as a flat blade
+    const tOut = T[0].clone().negate(), fanX = B[0].clone();
+    if (st < 1) {
+      v.crossVectors(T[0], VIEW);
+      if (v.lengthSq() > 1e-4) {
+        if (v.dot(fanX) < 0) v.negate();
+        fanX.lerp(v.normalize(), 1 - st).addScaledVector(tOut, -fanX.dot(tOut)).normalize();
+      }
+    }
+    tailFan.matrix.makeBasis(fanX, tOut, new THREE.Vector3().crossVectors(fanX, tOut).normalize()).setPosition(P[0]);
     tailFan.matrixWorldNeedsUpdate = true;
     for (const m of tailFan.children) m.rotation.z = m.userData.base + Math.sin(t * 1.5 + m.userData.base * 3) * 0.06;
 
-    // Head on the neck end, turned mostly toward the viewer at a slight 3/4 angle
-    const e = L, fwd = T[e].clone().multiplyScalar(0.25).add(faceDir).normalize();
-    const hu = new THREE.Vector3(0, 1, 0), rt = new THREE.Vector3().crossVectors(hu, fwd).normalize();
-    hu.crossVectors(fwd, rt).normalize();
-    headRoot.matrix.makeBasis(rt, hu, fwd).setPosition(P[e].clone().addScaledVector(fwd, -0.04));
+    // Head on the end of the neck: its frame is the neck's end frame tipped by HEAD_TILT
+    headBasis(T[L], D[L], hx, hy, hz);
+    headRoot.matrix.makeBasis(hx, hy, hz).setPosition(P[L]);
     headRoot.matrixWorldNeedsUpdate = true;
 
-    // ---- Four legs ----
-    const legScale = radiusAt(0.8) / 0.24;
-    const nearAt = i => (B[i].z >= 0 ? 1 : -1);
-    const shoulder = (sx, side) => {
-      const i = Math.round(sx * L), r = radiusAt(sx);
-      return { i, S: P[i].clone().addScaledVector(B[i], side * r * 0.8).addScaledVector(D[i], r * 0.3) };
-    };
-    // A foot that grips the ring at the point of the circle nearest its shoulder
-    const gripRing = (leg, sx, side, ls) => {
-      const { i, S } = shoulder(sx, side);
-      const th = Math.atan2(S.y, S.x) + 0.15 * side;
-      const rp = new THREE.Vector3(Math.cos(th) * R, Math.sin(th) * R, 0), radial = new THREE.Vector3(Math.cos(th), Math.sin(th), 0);
-      const target = rp.clone().addScaledVector(radial, 0.08).add(new THREE.Vector3(0, 0, Math.sign(S.z || 1) * 0.2 * ls));
-      const k = solveElbow(S, target, 0.62 * ls, 0.56 * ls, radial.clone().add(new THREE.Vector3(0, 0, 0.6)));
-      const sole = rp.clone().sub(k.W).normalize(), toes = radial.clone().negate();
-      toes.addScaledVector(sole, -toes.dot(sole)).normalize();
-      leg.pose(P[i], S, k.E, k.W, toes, sole, 1.65, ls);
-    };
-    // Front: one claw reaches forward toward the viewer, open and grasping; the other grips the ring
-    const fi = Math.round(0.8 * L), fSide = nearAt(fi);
-    const F1 = shoulder(0.8, fSide);
-    const T1 = F1.S.clone().add(new THREE.Vector3(-0.55, -0.45, 1.0).multiplyScalar(legScale));
-    const k1 = solveElbow(F1.S, T1, 0.62 * legScale, 0.56 * legScale, new THREE.Vector3(0.4, -0.7, 0.1));
-    raised.pose(P[F1.i], F1.S, k1.E, k1.W, new THREE.Vector3(-0.45, 0.8, 0.5).normalize(), new THREE.Vector3(-0.2, -0.35, 1).normalize(), 1.0 + state.flex * 0.5, legScale);
-    gripRing(grip, 0.77, -fSide, legScale);
-    // Rear, a little smaller: one grips the ring, the other trails back along the body
-    const rs = 0.85 * legScale, ri = Math.round(0.4 * L), rSide = nearAt(ri);
-    gripRing(rearGrip, 0.4, rSide, rs);
-    const R4 = shoulder(0.43, -rSide);
-    const T4 = R4.S.clone().addScaledVector(T[R4.i], -0.85 * rs).addScaledVector(D[R4.i], 0.25 * rs).addScaledVector(B[R4.i], -rSide * 0.2 * rs);
-    const k4 = solveElbow(R4.S, T4, 0.62 * rs, 0.56 * rs, D[R4.i].clone().negate());
-    rearTrail.pose(P[R4.i], R4.S, k4.E, k4.W, T[R4.i].clone().negate(), D[R4.i].clone(), 0.5, rs);
+    // ---- Front legs ----
+    // Coiled in place: both claws reach toward the viewer from the top of the arch, one each side of the
+    // body, open and grasping. Travelling: both fold back along the body.
+    const ls = bodyRadius(FRONT) / 0.24, lg = state.legs, fi = Math.round(FRONT * L), r = radiusAt(FRONT);
+    const backT = T[fi].clone().negate();
+    for (const [leg, side, reach, toesTo, palm, pole] of [
+      [nearLeg, F_SIDE, CLAW_NEAR, TOES_NEAR, PALM_NEAR, POLE_NEAR],
+      [farLeg, -F_SIDE, CLAW_FAR, TOES_FAR, PALM_FAR, POLE_FAR],
+    ]) {
+      const S = P[fi].clone().addScaledVector(B[fi], side * r * 0.8).addScaledVector(D[fi], r * 0.3);
+      const tucked = S.clone().addScaledVector(T[fi], -0.85 * ls).addScaledVector(D[fi], 0.3 * ls).addScaledVector(B[fi], side * 0.12 * ls);
+      const W = tucked.lerp(S.clone().addScaledVector(reach, ls), lg);
+      const k = solveElbow(S, W, 0.62 * ls, 0.56 * ls, D[fi].clone().negate().lerp(pole, lg));
+      leg.pose(P[fi], S, k.E, k.W, backT.clone().lerp(toesTo, lg).normalize(), D[fi].clone().lerp(palm, lg).normalize(),
+        THREE.MathUtils.lerp(0.5, 1.0 + state.flex * 0.5, lg), ls);
+    }
   }
 
+  // Which side of the chest faces the viewer at rest: the near claw goes there
+  rebuild(0);
+  F_SIDE = B[Math.round(FRONT * L)].z >= 0 ? 1 : -1;
+
   // Snarl every 6-8 s: jaw opens wider and the eyes flare
-  let nextSnarl = 4, snarlStart = -10;
+  let nextSnarl = 4, snarlStart = -10, lastT = null;
+  const arriveEase = a => 1 - Math.pow(1 - a, 2.3);
   return {
     group, eyes, jaw,
     eyeMaterial: mats.eye,
-    // t: seconds; intro: 0..1 coil-in progress; look: {x,y} -1..1 smoothed pointer;
-    // eyeTarget: world point the eyes should look at (the cursor, or the viewer)
-    // aim: {x,y} -1..1 raw cursor target (0,0 = facing the viewer); smoothed here per part
-    update(t, intro, look, still = false, eyeTarget = null, aim = null) {
+    // t: seconds; intro: 0..1 arrival progress (linear in time); look: {x,y} -1..1 smoothed pointer;
+    // eyeTarget: world point the eyes should look at (the cursor, or the viewer); aim: {x,y} -1..1 raw
+    // cursor target (0,0 = facing the viewer); leave: 0..1 scroll exit progress
+    update(t, intro, look, still = false, eyeTarget = null, aim = null, leave = 0) {
+      const dt = lastT === null ? 1 / 60 : THREE.MathUtils.clamp(t - lastT, 0, 0.1); lastT = t;
+      const a = still ? 1 : THREE.MathUtils.clamp(intro, 0, 1);
+      state.arrive = arriveEase(a);
+      state.leave = still ? 0 : THREE.MathUtils.clamp(leave, 0, 1);
+      state.settle = smooth(a, 0.78, 1) * (1 - smooth(state.leave, 0, 0.1));
+      state.legs = smooth(a, 0.86, 1) * (1 - smooth(state.leave, 0, 0.06));
+      group.visible = state.leave < 0.999;
+      if (!group.visible) return;
+
       const ax = still || !aim ? 0 : THREE.MathUtils.clamp(aim.x, -1, 1), ay = still || !aim ? 0 : THREE.MathUtils.clamp(aim.y, -1, 1);
       const yawT = ax * THREE.MathUtils.degToRad(35), pitchT = ay * THREE.MathUtils.degToRad(20);
-      const k = still ? 1 : 1;
-      turn.headYaw += (yawT - turn.headYaw) * (still ? 1 : 0.08 * k); turn.headPitch += (pitchT - turn.headPitch) * (still ? 1 : 0.08);
-      turn.neckYaw += (yawT - turn.neckYaw) * (still ? 1 : 0.05); turn.neckPitch += (pitchT - turn.neckPitch) * (still ? 1 : 0.05);
-      const e = 1 - Math.pow(1 - intro, 3);
-      state.coil = 0.2 + 0.8 * e;
-      state.theta = (1 - e) * -1.0;
-      state.phase = 0.9 + (still ? 0 : Math.sin(t * 0.22) * 0.22);
+      const kTurn = still ? 1 : 1 - Math.exp(-dt * 4.2);
+      turn.yaw += (yawT - turn.yaw) * kTurn; turn.pitch += (pitchT - turn.pitch) * kTurn;
       state.sway = still ? 0 : t;
       state.breath = still ? 0 : Math.sin(t * 1.15);
-      if (!still && intro >= 1 && t > nextSnarl) { snarlStart = t; nextSnarl = t + 6 + Math.random() * 2; }
-      const st = t - snarlStart;
-      state.snarl = still ? 0 : (st >= 0 && st < 1.3 ? Math.sin((st / 1.3) * Math.PI) : 0);
-      // The raised claw flexes now and then (a slow pulse)
+      if (!still && state.settle > 0.99 && t > nextSnarl) { snarlStart = t; nextSnarl = t + 6 + Math.random() * 2; }
+      const sn = t - snarlStart;
+      state.snarl = still ? 0 : (sn >= 0 && sn < 1.3 ? Math.sin((sn / 1.3) * Math.PI) : 0);
+      // The claws flex now and then (a slow pulse)
       state.flex = still ? 0.2 : Math.pow(Math.max(0, Math.sin(t * 0.55)), 6);
-      rebuild(t, look);
+      rebuild(t);
 
-      const o = Math.min(1, intro * 1.6);
-      for (const m of fadeable) {
-        if (m === mats.eye) continue;
-        m.opacity = o;
-        const want = o < 1;
-        if (m.transparent !== want) { m.transparent = want; m.needsUpdate = true; }
-      }
-      // Head turns slightly toward the pointer and rears back on a snarl
-      // The head turns gently toward the cursor; the eyes do most of the looking
-      // The neck carries part of the turn; the head adds the rest so the total reaches about ±35° / ±20°
-      headPivot.rotation.y = turn.headYaw * 0.45;
-      headPivot.rotation.x = -turn.headPitch * 0.5 - state.snarl * 0.12;
       if (eyeTarget) {
         group.updateMatrixWorld(true);
         for (const { socket, ball } of eyeballs) {
           const l = socket.worldToLocal(eyeTarget.clone());
           const yaw = THREE.MathUtils.clamp(Math.atan2(l.x, l.z), -0.6, 0.6);
           const pitch = THREE.MathUtils.clamp(-Math.atan2(l.y, Math.hypot(l.x, l.z)), -0.4, 0.4);
-          ball.rotation.y += (yaw - ball.rotation.y) * 0.12;
-          ball.rotation.x += (pitch - ball.rotation.x) * 0.12;
+          const ke = still ? 1 : 1 - Math.exp(-dt * 7.5);
+          ball.rotation.y += (yaw - ball.rotation.y) * ke;
+          ball.rotation.x += (pitch - ball.rotation.x) * ke;
         }
       }
       jaw.rotation.x = 0.5 + state.snarl * 0.28 + (still ? 0 : Math.sin(t * 0.9) * 0.03);
       // Beard and mane sway a little
       for (const m of beard.children) m.rotation.x = m.userData.base + (still ? 0 : Math.sin(t * 1.4 + m.position.z * 9) * 0.06);
-      for (const m of mane.children) m.rotation.z = m.userData.base + (still ? 0 : Math.sin(t * 1.2 + m.position.x * 10) * 0.07);
+      mane.children.forEach((m, k) => m.quaternion.copy(m.userData.q0).multiply(qT.setFromAxisAngle(UP_X, still ? 0 : Math.sin(t * 1.2 + k * 0.8) * 0.08)));
       for (const m of cheeks.children) m.rotation.z = m.userData.base + (still ? 0 : Math.sin(t * 1.1 + m.position.y * 12) * 0.05);
     },
     setEyes(level) {
