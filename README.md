@@ -45,3 +45,21 @@ On screens wider than 900px the hero stays pinned while that plays (`--pin` on `
 
 Phones and touch devices get a lighter body mesh, fewer clouds and half-resolution bloom.
 With reduced motion the dragon is drawn once in its final pose, with no clouds, and nothing moves on scroll. Without WebGL the still stays, and on scroll it spins away to the left with the headline sliding apart.
+
+## Dragons
+
+Three dragons ship with the hero. Pick one in `js/hero/hero.js` (`const DRAGON = 'gray'`), or try one by
+adding `?dragon=gold` or `?dragon=classic` to the address.
+
+- `gold` (`js/hero/dragon.js`, alternative): antique gold and bronze, deer-like antlers, long whiskers, flame mane, four legs.
+- `gray` (`js/hero/dragon-gray.js`, the default): the brand-gray dragon with one horn per side and no whiskers.
+- `classic` (`js/hero/dragon-classic.js`): the first ring-coiled dragon.
+
+## Page sections and motion
+
+`css/site.css` and `js/site.js` hold the editorial layout and its motion (GSAP and ScrollTrigger from cdnjs):
+word-by-word statements, counters, the pinned services scene, the sideways work reel, and the gold
+"dragon body" curve drawn between sections. The dragon appears in the page as only two quiet motifs: a
+scale watermark behind About and that curve. Without GSAP, or with reduced motion, the page falls back to
+a static layout. Prices in the Pricing section read "On request" until real prices are filled in
+(`data-price` in `index.html`).

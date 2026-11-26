@@ -1,3 +1,4 @@
+// GOLD VARIANT (default): antique gold and bronze imperial dragon with antlers, whiskers and four legs.
 // The imperial dragon (Anantaboga) threaded through the ring, built like the logo: a heavy scaled body,
 // a scowling roaring head with beard and mane, and two clawed front legs at the top of the arch, one each
 // side, both reaching toward the viewer. The body slides along a track (spine.js): it rises from below
@@ -8,8 +9,11 @@ import { REST, createTrack, createSolver, bodyRadius, bodyFrames, headBasis, HEA
 
 const ORANGE = new THREE.Color('#F7991F');
 const GRAY = new THREE.Color('#7A7A7A');
+// Antique gold sculpture: deep bronze in the recesses, antique gold on the scales, brushed champagne on
+// the belly plates and highlights
+const BRONZE = new THREE.Color('#3a2410'), ANTIQUE = new THREE.Color('#a8792f'), CHAMPAGNE = new THREE.Color('#d9bf8a');
 const LIGHT_GRAY = new THREE.Color('#A0A0A0');
-const BONE = new THREE.Color('#E8E2D6');
+const BONE = new THREE.Color('#e6d3a8');
 const UP_X = new THREE.Vector3(1, 0, 0);
 const VIEW = new THREE.Vector3(0, 0, 1); // toward the viewer
 const smooth = THREE.MathUtils.smoothstep;
@@ -62,14 +66,15 @@ function scaleMaps(size = 256) {
 }
 
 // Matte dark metal with a strong light-gray rim that outlines the silhouette on black
-function rimify(m, rim) {
+function rimify(m, rim, tint = [0.42, 0.3, 0.14]) {
   m.onBeforeCompile = shader => {
     shader.uniforms.uRim = { value: rim };
+    shader.uniforms.uTint = { value: new THREE.Vector3(...tint) };
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform float uRim;')
+      .replace('#include <common>', '#include <common>\nuniform float uRim;\nuniform vec3 uTint;')
       .replace('#include <opaque_fragment>',
         'float fres = pow(1.0 - saturate(dot(normal, normalize(vViewPosition))), 2.6);\n' +
-        'outgoingLight += vec3(0.36) * fres * uRim;\n#include <opaque_fragment>');
+        'outgoingLight += uTint * fres * uRim;\n#include <opaque_fragment>');
   };
   return m;
 }
@@ -78,7 +83,7 @@ function scaleMaterial(maps, { repeat = [1, 1], color = '#ffffff', rim = 0.75, v
   const map = maps.cavity.clone(); map.repeat.set(...repeat); map.needsUpdate = true;
   return rimify(new THREE.MeshStandardMaterial({
     color, map, normalMap, normalScale: new THREE.Vector2(normal, normal),
-    metalness: 0.5, roughness: 0.68, envMapIntensity: 0.4, vertexColors,
+    metalness: 0.82, roughness: 0.42, envMapIntensity: 0.9, vertexColors,
   }), rim);
 }
 
@@ -200,10 +205,24 @@ function buildHead(mats, lite) {
   blob([0.045, 0.016, 0.06], [0, 0.04, 0.42], [-0.15, 0, 0], mats.tongue, jaw);
   blob([0.006, 0.012, 0.15], [0, 0.047, 0.29], [-0.06, 0, 0], mats.mouth, jaw); // groove down the middle of the tongue
 
-  // Two thick, short, back-swept horns with ridges
-  const hornSegs = lite ? 16 : 30;
+  // Deer-like antlers: a main beam rising and sweeping back, with tines branching up and forward
+  const hornSegs = lite ? 14 : 26, hornRad = lite ? 7 : 10;
   for (const s of [-1, 1]) {
-    head.add(new THREE.Mesh(sweep([[s * 0.1, 0.17, -0.04], [s * 0.14, 0.24, -0.2], [s * 0.18, 0.31, -0.36], [s * 0.21, 0.42, -0.47], [s * 0.22, 0.56, -0.5]], taper(0.058, 0.007, 8), hornSegs, lite ? 8 : 12), mats.horn));
+    const beam = [[s * 0.1, 0.17, -0.04], [s * 0.16, 0.3, -0.16], [s * 0.24, 0.45, -0.32], [s * 0.3, 0.56, -0.55], [s * 0.33, 0.62, -0.82]];
+    head.add(new THREE.Mesh(sweep(beam, taper(0.05, 0.01, 6), hornSegs, hornRad), mats.horn));
+    // tines: [start on the beam, end point]
+    for (const [a, b] of [
+      [[s * 0.15, 0.28, -0.14], [s * 0.17, 0.48, -0.02]],
+      [[s * 0.24, 0.45, -0.32], [s * 0.3, 0.68, -0.22]],
+      [[s * 0.29, 0.55, -0.52], [s * 0.42, 0.75, -0.5]],
+      [[s * 0.31, 0.6, -0.7], [s * 0.26, 0.8, -0.78]],
+    ]) {
+      const mid = [(a[0] + b[0]) / 2 + s * 0.02, (a[1] + b[1]) / 2 + 0.02, (a[2] + b[2]) / 2];
+      head.add(new THREE.Mesh(sweep([a, mid, b], taper(0.028, 0.006), lite ? 8 : 12, lite ? 6 : 8), mats.horn));
+    }
+    // Long whiskers from the upper lip, flowing back and down in a slow S
+    head.add(new THREE.Mesh(sweep([[s * 0.09, 0.02, 0.56], [s * 0.19, -0.03, 0.5], [s * 0.28, -0.16, 0.4], [s * 0.34, -0.36, 0.24], [s * 0.32, -0.56, 0.06], [s * 0.38, -0.74, -0.08], [s * 0.46, -0.86, -0.06]],
+      taper(0.016, 0.003), lite ? 24 : 48, lite ? 5 : 7), mats.whisker));
     // Cheek spikes
     for (let k = 0; k < 3; k++) add(head, tooth, mats.fin, [0.045 - k * 0.008, 0.15 - k * 0.03, 0.045], [s * 0.24, -0.02 - k * 0.07, -0.08 - k * 0.03], [-1.9, 0, s * (0.75 + k * 0.2)]);
   }
@@ -232,14 +251,15 @@ function buildHead(mats, lite) {
   }
   // Mane: a collar of tufts round the top and sides of the nape, flowing back along the neck, so the
   // join between head and neck sits under hair
+  const flame = tuftGeometry(lite ? 4 : 6, true);
   const mane = new THREE.Group(); head.add(mane);
   const maneN = lite ? 9 : 18;
   const across = new THREE.Vector3(0, Math.cos(HEAD_TILT), Math.sin(HEAD_TILT)); // up, square to the neck
   for (let k = 0; k < maneN; k++) {
     const a = -1.85 + (k / (maneN - 1)) * 3.7; // 0 = top of the neck
     const out = new THREE.Vector3(Math.sin(a), 0, 0).addScaledVector(across, Math.cos(a));
-    const m = new THREE.Mesh(tuft, mats.hair);
-    m.scale.set(0.05, 0.22 + (k % 2) * 0.08 + Math.cos(a) * 0.05, 0.035);
+    const m = new THREE.Mesh(flame, mats.hair);
+    m.scale.set(0.055, 0.36 + (k % 2) * 0.14 + Math.cos(a) * 0.08, 0.09);
     m.position.copy(NAPE).multiplyScalar(0.1 + (k % 2) * 0.05).addScaledVector(out, 0.15);
     m.quaternion.setFromUnitVectors(UP, NAPE.clone().addScaledVector(out, 0.45).normalize());
     m.userData.q0 = m.quaternion.clone();
@@ -370,20 +390,21 @@ export function createDragon({ lite = false } = {}) {
 
   const maps = scaleMaps(lite ? 128 : 256);
   const mats = {
-    body: scaleMaterial(maps, { repeat: lite ? [30, 4] : [46, 6], vertexColors: true }),
-    skin: scaleMaterial(maps, { repeat: [5, 4], color: '#6a6a6a', normal: 1.2 }),
-    horn: rimify(new THREE.MeshStandardMaterial({ color: '#7A7A7A', metalness: 0.45, roughness: 0.55, envMapIntensity: 0.35 }), 0.35),
-    hair: rimify(new THREE.MeshStandardMaterial({ color: '#9a9a9a', vertexColors: true, metalness: 0.25, roughness: 0.85 }), 0.3),
-    tooth: new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.05, roughness: 0.38 }),
-    talon: rimify(new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.1, roughness: 0.32 }), 0.4),
-    limb: scaleMaterial(maps, { repeat: [7, 3], color: '#6a6a6a', normal: 1.3 }),
-    toe: scaleMaterial(maps, { repeat: [3, 3], color: '#626262', normal: 1.6 }),
-    sclera: new THREE.MeshStandardMaterial({ color: '#1a0e05', roughness: 0.35, metalness: 0.1 }),
+    body: scaleMaterial(maps, { repeat: lite ? [44, 5] : [70, 8], vertexColors: true, rim: 0.55 }),
+    skin: scaleMaterial(maps, { repeat: [5, 4], color: '#b0823a', normal: 1.2, rim: 0.5 }),
+    horn: rimify(new THREE.MeshStandardMaterial({ color: '#c9a161', metalness: 0.95, roughness: 0.22, envMapIntensity: 1.1 }), 0.4),
+    whisker: rimify(new THREE.MeshStandardMaterial({ color: '#d4b47a', metalness: 0.9, roughness: 0.3, envMapIntensity: 1 }), 0.35),
+    hair: rimify(new THREE.MeshStandardMaterial({ color: '#a97f3c', metalness: 0.85, roughness: 0.42, envMapIntensity: 0.8 }), 0.3),
+    tooth: new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.6, roughness: 0.25 }),
+    talon: rimify(new THREE.MeshStandardMaterial({ color: '#e2c98f', metalness: 0.95, roughness: 0.18, envMapIntensity: 1.2 }), 0.4),
+    limb: scaleMaterial(maps, { repeat: [9, 3], color: '#b0823a', normal: 1.3, rim: 0.5 }),
+    toe: scaleMaterial(maps, { repeat: [3, 3], color: '#a77a34', normal: 1.6, rim: 0.5 }),
+    sclera: new THREE.MeshStandardMaterial({ color: '#120a03', roughness: 0.3, metalness: 0.4 }),
     tongue: new THREE.MeshStandardMaterial({ color: '#7e3328', roughness: 0.55 }),
     mouth: new THREE.MeshStandardMaterial({ color: '#0e0603', roughness: 0.95 }),
     dark: new THREE.MeshBasicMaterial({ color: '#000000' }),
-    eye: new THREE.MeshBasicMaterial({ color: ORANGE.clone(), toneMapped: false }),
-    fin: rimify(new THREE.MeshStandardMaterial({ color: '#5a5a5a', metalness: 0.5, roughness: 0.6, envMapIntensity: 0.4, flatShading: true }), 0.7),
+    eye: new THREE.MeshBasicMaterial({ color: new THREE.Color('#e8a43a'), toneMapped: false }),
+    fin: rimify(new THREE.MeshStandardMaterial({ color: '#9c6f2c', metalness: 0.9, roughness: 0.35, envMapIntensity: 1, flatShading: true }), 0.5),
   };
 
   // ---- Body buffers (index built once, positions rewritten per frame) ----
@@ -403,14 +424,21 @@ export function createDragon({ lite = false } = {}) {
   const body = new THREE.Mesh(bodyGeo, mats.body); body.frustumCulled = false;
 
   // Dark back, lighter ribbed belly plates (like the logo's neck)
-  const back = GRAY.clone().multiplyScalar(0.62), bellyC = LIGHT_GRAY.clone().multiplyScalar(0.78), c = new THREE.Color();
+  const back = ANTIQUE.clone(), bellyC = CHAMPAGNE.clone(), c = new THREE.Color();
+  // u runs along the body in steps of body radius, so each scale is about the same shape everywhere and
+  // smaller where the body narrows
+  const uAlong = new Float32Array(L + 1);
+  for (let i = 1; i <= L; i++) uAlong[i] = uAlong[i - 1] + 1 / (bodyRadius(i / L) + 0.02);
+  for (let i = 0; i <= L; i++) uAlong[i] /= uAlong[L];
   for (let i = 0; i <= L; i++) {
     const rib = (Math.floor(i / (lite ? 3 : 5)) % 2) ? 0.82 : 1;
     for (let j = 0; j <= RAD; j++) {
       const k = i * (RAD + 1) + j, a = (j / RAD) * Math.PI * 2;
       const belly = smooth(Math.cos(a), 0.45, 0.85);
-      c.copy(back).lerp(bellyC.clone().multiplyScalar(rib), belly);
-      col.set([c.r, c.g, c.b], k * 3); uv.set([i / L, j / RAD], k * 2);
+      // a slight darkening down the flanks into bronze, champagne belly plates
+      const flank = Math.max(0, -Math.cos(a)) * 0.25;
+      c.copy(back).lerp(BRONZE, flank).lerp(bellyC.clone().multiplyScalar(rib), belly);
+      col.set([c.r, c.g, c.b], k * 3); uv.set([uAlong[i], j / RAD], k * 2);
     }
   }
 
@@ -450,9 +478,12 @@ export function createDragon({ lite = false } = {}) {
   const tailFins = new THREE.InstancedMesh(tuftG, mats.hair, TAILF); tailFins.frustumCulled = false;
   // Two front legs, one each side of the chest just behind the neck, both reaching toward the viewer
   const nearLeg = buildLeg(mats, lite), farLeg = buildLeg(mats, lite);
+  // Two rear legs further back along the body, smaller
+  const rearNear = buildLeg(mats, lite), rearFar = buildLeg(mats, lite);
+  const REAR = 0.42;
 
   const group = new THREE.Group();
-  group.add(body, fins, neckMane, headRoot, nearLeg.group, farLeg.group, tailFan, tailFins);
+  group.add(body, fins, neckMane, headRoot, nearLeg.group, farLeg.group, rearNear.group, rearFar.group, tailFan, tailFins);
 
   // ---- Spine: the track the body slides along, and the collision solver ----
   const track = createTrack();
@@ -473,10 +504,12 @@ export function createDragon({ lite = false } = {}) {
   const TRAVEL_DOWN = new THREE.Vector3(0, -0.3, -1).normalize(); // flying, the back faces the viewer
   // Front claws at rest: where each wrist reaches from its shoulder (in leg lengths), where its fingers
   // point, which way its palm faces and which way its elbow bends
-  const CLAW_NEAR = new THREE.Vector3(-0.55, -0.45, 1.0), CLAW_FAR = new THREE.Vector3(0.5, -0.6, 0.95);
-  const TOES_NEAR = new THREE.Vector3(-0.45, 0.8, 0.5).normalize(), TOES_FAR = new THREE.Vector3(0.45, 0.8, 0.5).normalize();
-  const PALM_NEAR = new THREE.Vector3(-0.2, -0.35, 1).normalize(), PALM_FAR = new THREE.Vector3(0.2, -0.35, 1).normalize();
-  const POLE_NEAR = new THREE.Vector3(0.4, -0.7, 0.1), POLE_FAR = new THREE.Vector3(-0.2, -0.8, -0.3);
+  // The near (left) claw reaches toward the viewer; the far (right) claw rises over the far side of the
+  // body, up and forward over the arch toward the head, on its own side
+  const CLAW_NEAR = new THREE.Vector3(-0.55, -0.45, 1.0), CLAW_FAR = new THREE.Vector3(-1.2, 0.45, -0.15);
+  const TOES_NEAR = new THREE.Vector3(-0.45, 0.8, 0.5).normalize(), TOES_FAR = new THREE.Vector3(-0.75, 0.65, 0.1).normalize();
+  const PALM_NEAR = new THREE.Vector3(-0.2, -0.35, 1).normalize(), PALM_FAR = new THREE.Vector3(-0.45, 0.1, 0.9).normalize();
+  const POLE_NEAR = new THREE.Vector3(0.4, -0.7, 0.1), POLE_FAR = new THREE.Vector3(0.5, -0.1, -0.85);
   const turn = { yaw: 0, pitch: 0 };
   let turning = false, trackStill = false, F_SIDE = 1;
 
@@ -625,19 +658,37 @@ export function createDragon({ lite = false } = {}) {
 
     // ---- Front legs ----
     // Coiled in place: both claws reach toward the viewer from the top of the arch, one each side of the
-    // body, open and grasping. Travelling: both fold back along the body.
+    // body, open and grasping. Travelling (arriving or flying off): both reach forward with the body's
+    // movement, claws pointing ahead.
     const ls = bodyRadius(FRONT) / 0.24, lg = state.legs, fi = Math.round(FRONT * L), r = radiusAt(FRONT);
-    const backT = T[fi].clone().negate();
+    // 'Forward' is the way the body is moving at the shoulder (toward the head along the body)
+    const fwdT = T[fi].clone();
     for (const [leg, side, reach, toesTo, palm, pole] of [
       [nearLeg, F_SIDE, CLAW_NEAR, TOES_NEAR, PALM_NEAR, POLE_NEAR],
       [farLeg, -F_SIDE, CLAW_FAR, TOES_FAR, PALM_FAR, POLE_FAR],
     ]) {
       const S = P[fi].clone().addScaledVector(B[fi], side * r * 0.8).addScaledVector(D[fi], r * 0.3);
-      const tucked = S.clone().addScaledVector(T[fi], -0.85 * ls).addScaledVector(D[fi], 0.3 * ls).addScaledVector(B[fi], side * 0.12 * ls);
+      const tucked = S.clone().addScaledVector(T[fi], 0.85 * ls).addScaledVector(D[fi], 0.35 * ls).addScaledVector(B[fi], side * 0.3 * ls);
       const W = tucked.lerp(S.clone().addScaledVector(reach, ls), lg);
-      const k = solveElbow(S, W, 0.62 * ls, 0.56 * ls, D[fi].clone().negate().lerp(pole, lg));
-      leg.pose(P[fi], S, k.E, k.W, backT.clone().lerp(toesTo, lg).normalize(), D[fi].clone().lerp(palm, lg).normalize(),
-        THREE.MathUtils.lerp(0.5, 1.0 + state.flex * 0.5, lg), ls);
+      // reaching forward, the elbow bends back toward the tail
+      const k = solveElbow(S, W, 0.62 * ls, 0.56 * ls, fwdT.clone().negate().lerp(pole, lg));
+      leg.pose(P[fi], S, k.E, k.W, fwdT.clone().lerp(toesTo, lg).normalize(), D[fi].clone().lerp(palm, lg).normalize(),
+        THREE.MathUtils.lerp(0.15, 1.0 + state.flex * 0.5, lg), ls);
+    }
+    // Rear legs: at rest they reach down and out from the body, claws half open; travelling they reach
+    // forward with the body's movement. Everything is measured in the body's own frame.
+    {
+      const ri = Math.round(REAR * L), rr = radiusAt(REAR), rs = ls * 0.82, rT = T[ri].clone();
+      for (const [leg, side] of [[rearNear, F_SIDE], [rearFar, -F_SIDE]]) {
+        const S = P[ri].clone().addScaledVector(B[ri], side * rr * 0.8).addScaledVector(D[ri], rr * 0.3);
+        const rest = S.clone().addScaledVector(D[ri], 0.62 * rs).addScaledVector(B[ri], side * 0.55 * rs).addScaledVector(rT, -0.2 * rs);
+        const move = S.clone().addScaledVector(rT, 0.85 * rs).addScaledVector(D[ri], 0.35 * rs).addScaledVector(B[ri], side * 0.3 * rs);
+        const W = move.lerp(rest, lg);
+        const k = solveElbow(S, W, 0.62 * rs, 0.56 * rs, rT.clone().negate().addScaledVector(D[ri], -0.3 * lg));
+        const toes = rT.clone().lerp(D[ri].clone().addScaledVector(rT, 0.6).addScaledVector(B[ri], side * 0.3), lg).normalize();
+        leg.pose(P[ri], S, k.E, k.W, toes, D[ri].clone().negate().lerp(rT.clone().negate(), 0.3).normalize(),
+          THREE.MathUtils.lerp(0.15, 0.9 + state.flex * 0.3, lg), rs);
+      }
     }
   }
 
@@ -696,7 +747,7 @@ export function createDragon({ lite = false } = {}) {
     },
     setEyes(level) {
       // level 0..1: dark to lit; a snarl flares the glow
-      mats.eye.color.copy(ORANGE).multiplyScalar((0.06 + level * 1.5) * (1 + state.snarl * 0.9));
+      mats.eye.color.set('#e8a43a').multiplyScalar((0.06 + level * 0.95) * (1 + state.snarl * 0.5));
     },
   };
 }

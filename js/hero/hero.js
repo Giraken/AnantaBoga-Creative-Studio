@@ -8,6 +8,10 @@ if (hero) {
   if (new URLSearchParams(location.search).has('capture')) hero.classList.add('is-capture');
   const overlay = createOverlay(hero);
   const lite = window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+  // Which dragon to show: 'gray' (default, the brand-gray version), 'gold' or 'classic'.
+  // Change DRAGON here to switch for good, or add ?dragon=gold to the address to try one.
+  const DRAGON = 'gray';
+  const variant = new URLSearchParams(location.search).get('dragon') || DRAGON;
 
   const supportsWebGL = () => {
     try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); }
@@ -18,9 +22,11 @@ if (hero) {
     if (!supportsWebGL()) return overlay.keepFallback();
     try {
       const { startScene } = await import('./scene.js');
-      const scene = startScene(overlay.stageEl, { lite, still: overlay.reduce, exit: overlay.exitProgress });
+      const scene = startScene(overlay.stageEl, { lite, still: overlay.reduce, exit: overlay.exitProgress, variant });
       await scene.ready;
       overlay.showScene(scene.canvas);
+      // Start the intro once the canvas has faded in over the still image
+      setTimeout(scene.begin, overlay.reduce ? 0 : 700);
     } catch (err) {
       console.warn('3D hero unavailable, keeping the static image.', err && (err.name + ': ' + err.message + ' ' + (err.stack || '')));
       overlay.keepFallback();

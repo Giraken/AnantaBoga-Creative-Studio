@@ -24,12 +24,25 @@ export function createOverlay(hero) {
     const range = span > 40 ? span : stageWrap.offsetHeight * 0.6;
     return Math.min(1, Math.max(0, -top / range));
   };
+  let enter = 0; // 1..0 while the HTML headline slides in (no-WebGL fallback only)
   const onScroll = () => {
     exit = read();
     // For the HTML copy of the headline and the still image (shown without WebGL)
-    const words = Math.min(1, exit / 0.75);
+    let words = Math.min(1, exit / 0.75);
+    words = Math.max(words * words * (3 - 2 * words), enter);
     hero.style.setProperty('--exit', exit.toFixed(4));
-    hero.style.setProperty('--words', (words * words * (3 - 2 * words)).toFixed(4));
+    hero.style.setProperty('--words', words.toFixed(4));
+  };
+  // FORGED IN slides in from the left and LEGEND from the right
+  const wordsIn = () => {
+    if (reduce) return;
+    const t0 = performance.now();
+    const step = now => {
+      const k = Math.min(1, (now - t0) / 1200);
+      enter = Math.pow(1 - k, 3); onScroll();
+      if (k < 1) requestAnimationFrame(step);
+    };
+    enter = 1; onScroll(); requestAnimationFrame(step);
   };
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -58,6 +71,6 @@ export function createOverlay(hero) {
       else fallback.addEventListener('transitionend', () => fallback.remove(), { once: true });
     },
     // WebGL unavailable or the scene failed: keep the logo fallback in place
-    keepFallback() { hero.classList.add('no-scene'); },
+    keepFallback() { hero.classList.add('no-scene'); wordsIn(); },
   };
 }
