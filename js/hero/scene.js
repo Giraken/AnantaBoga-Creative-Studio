@@ -39,6 +39,11 @@ export function startScene(host, { lite = false, still = false, root = host.pare
   renderer.setClearColor(0x0c0c0c, 1); // Black Wash
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
+  // Soft shadows from the key light, so the coils, claws and head shade each other. Updated once per
+  // frame by hand (renderFrame), not again for the glow pass.
+  renderer.shadowMap.enabled = !lite; // phones skip shadows to keep the frame rate
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false;
   host.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -51,7 +56,12 @@ export function startScene(host, { lite = false, still = false, root = host.pare
 
   // Lights: cool key from upper left, light-gray rims from behind, orange practicals from ring and eyes
   scene.add(new THREE.HemisphereLight(0xbfbfbf, 0x000000, 0.25));
-  const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(-4, 5, 6); scene.add(key);
+  // The key comes from high on the left at a 3/4 angle, so the coils throw visible shadows on each other
+  const key = new THREE.DirectionalLight(0xffffff, 1.7); key.position.set(-6.5, 7, 4.5); scene.add(key);
+  key.castShadow = true;
+  key.shadow.mapSize.set(lite ? 1024 : 2048, lite ? 1024 : 2048);
+  Object.assign(key.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5, near: 1, far: 25 });
+  key.shadow.bias = -0.0004; key.shadow.normalBias = 0.025; key.shadow.radius = 3;
   const rimA = new THREE.DirectionalLight(0xa0a0a0, 3.4); rimA.position.set(5, 3, -6); scene.add(rimA);
   const rimB = new THREE.DirectionalLight(0xa0a0a0, 1.6); rimB.position.set(-6, -2, -5); scene.add(rimB);
   const ringLight = new THREE.PointLight(ORANGE, 0, 9, 1.6); ringLight.position.set(0, -1.2, 1.4);
@@ -72,7 +82,10 @@ export function startScene(host, { lite = false, still = false, root = host.pare
     const fill = new THREE.DirectionalLight(0xfff0dc, 0.45); fill.position.set(5, -1, 6); scene.add(fill);
   }
   stage.add(dragon.group);
+  dragon.group.traverse(o => { if (o.isMesh && !o.material.transparent) { o.castShadow = true; o.receiveShadow = true; } });
   dragon.eyes[0].add(eyeLight);
+  // The wet corneas over the eyes stay see-through in the glow pass, so the irises still glow
+  (dragon.glass || []).forEach(e => e.layers.enable(BLOOM));
   dragon.eyes.forEach(e => e.layers.enable(BLOOM));
   stage.rotation.set(BASE_TILT.x, BASE_TILT.y, 0);
 
@@ -135,6 +148,7 @@ export function startScene(host, { lite = false, still = false, root = host.pare
     bloomComposer.render();
     scene.environment = env;
     restore();
+    renderer.shadowMap.needsUpdate = true;
     composer.render();
   }
 

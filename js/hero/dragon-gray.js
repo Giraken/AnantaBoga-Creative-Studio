@@ -5,6 +5,7 @@
 // the frame and coils into place, and on scroll loops away to the left, never passing through the ring or
 // itself. The body skin, the head on the end of the neck and the legs are re-solved every frame.
 import * as THREE from 'three';
+import { scaleMaps, finish, skinMaterial, lumpySphere, fangGeometry } from './realism.js';
 import { REST, createTrack, createSolver, bodyRadius, bodyFrames, headBasis, HEAD_TILT, HEAD_SPHERES, HEAD_DOWN } from './spine.js';
 
 const ORANGE = new THREE.Color('#FF9800');
@@ -15,73 +16,9 @@ const UP_X = new THREE.Vector3(1, 0, 0);
 const VIEW = new THREE.Vector3(0, 0, 1); // toward the viewer
 const smooth = THREE.MathUtils.smoothstep;
 
-// ---------- Engraved scale texture: height -> normal map + cavity (AO) map ----------
-function scaleMaps(size = 256) {
-  const cols = 6, rows = 4, w = size / cols, h = size / rows, rho = w * 0.86;
-  const height = new Float32Array(size * size);
-  const wrap = (v, m) => ((v % m) + m) % m;
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      let found = false, bestD = 0;
-      const c0 = Math.floor(x / w);
-      // The scale nearer the head lies on top, so each crescent edge stays visible
-      for (let c = c0 + 1; c >= c0 - 1 && !found; c--) {
-        const cx = c * w, off = (wrap(c, cols) & 1) * 0.5, r0 = Math.round(y / h - off);
-        for (let r = r0 - 1; r <= r0 + 1; r++) {
-          let dx = x - cx, dy = y - (r + off) * h;
-          dx = wrap(dx + size / 2, size) - size / 2; dy = wrap(dy + size / 2, size) - size / 2;
-          const d = Math.hypot(dx, dy) / rho;
-          if (d < 1 && dx <= rho * 0.3) { found = true; bestD = d; break; }
-        }
-      }
-      const dome = found ? Math.pow(1 - bestD * bestD, 0.6) : 0;
-      // Engraved hatching across each scale, denser toward its edge, like the logo
-      const hatch = 0.07 * Math.sin((x * 0.8 + y * 0.45) * 1.1) * smooth(bestD, 0.35, 0.95);
-      height[y * size + x] = dome + hatch;
-    }
-  }
-  const nrm = new Uint8Array(size * size * 4), cav = new Uint8Array(size * size * 4);
-  const H = (x, y) => height[wrap(y, size) * size + wrap(x, size)];
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const dx = (H(x + 1, y) - H(x - 1, y)) * 3.2, dy = (H(x, y + 1) - H(x, y - 1)) * 3.2;
-      const l = Math.hypot(dx, dy, 1), i = (y * size + x) * 4;
-      nrm[i] = (-dx / l * 0.5 + 0.5) * 255; nrm[i + 1] = (-dy / l * 0.5 + 0.5) * 255; nrm[i + 2] = (1 / l * 0.5 + 0.5) * 255; nrm[i + 3] = 255;
-      const edge = Math.min(1, Math.hypot(dx, dy) * 1.2);
-      const v = Math.max(0, Math.min(1, 0.32 + 0.68 * H(x, y) - edge * 0.55)) * 255;
-      cav[i] = cav[i + 1] = cav[i + 2] = v; cav[i + 3] = 255;
-    }
-  }
-  const make = (data, srgb) => {
-    const t = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.LinearFilter;
-    t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.anisotropy = 4;
-    if (srgb) t.colorSpace = THREE.SRGBColorSpace;
-    t.needsUpdate = true; return t;
-  };
-  return { normal: make(nrm, false), cavity: make(cav, true) };
-}
-
-// Matte dark metal with a strong light-gray rim that outlines the silhouette on black
-function rimify(m, rim) {
-  m.onBeforeCompile = shader => {
-    shader.uniforms.uRim = { value: rim };
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform float uRim;')
-      .replace('#include <opaque_fragment>',
-        'float fres = pow(1.0 - saturate(dot(normal, normalize(vViewPosition))), 2.6);\n' +
-        'outgoingLight += vec3(0.36) * fres * uRim;\n#include <opaque_fragment>');
-  };
-  return m;
-}
-function scaleMaterial(maps, { repeat = [1, 1], color = '#ffffff', rim = 0.75, vertexColors = false, normal = 1.5 } = {}) {
-  const normalMap = maps.normal.clone(); normalMap.repeat.set(...repeat); normalMap.needsUpdate = true;
-  const map = maps.cavity.clone(); map.repeat.set(...repeat); map.needsUpdate = true;
-  return rimify(new THREE.MeshStandardMaterial({
-    color, map, normalMap, normalScale: new THREE.Vector2(normal, normal),
-    metalness: 0.5, roughness: 0.68, envMapIntensity: 0.4, vertexColors,
-  }), rim);
-}
+// Rim-lit finish (see realism.js); trans lets light from behind show through thin parts
+const rimify = (m, rim, trans = 0) => finish(m, { rim, trans });
+const scaleMaterial = skinMaterial;
 
 // A static tube with a radius function along its length (horns, whiskers, talons, tongue)
 function sweep(points, radius, segs = 24, radial = 8) {
@@ -134,12 +71,13 @@ const NAPE = new THREE.Vector3(0, Math.sin(HEAD_TILT), -Math.cos(HEAD_TILT));
 const UP = new THREE.Vector3(0, 1, 0);
 function buildHead(mats, lite) {
   const head = new THREE.Group();
-  const SEG = lite ? 16 : 26;
+  const SEG = lite ? 16 : 40;
   const sphere = new THREE.SphereGeometry(1, SEG, Math.round(SEG * 0.7));
+  const lumpy = lumpySphere(SEG); // skin shapes get soft lumps and wrinkles instead of perfect spheres
   const add = (parent, geo, mat, s, p, r = [0, 0, 0]) => {
     const m = new THREE.Mesh(geo, mat); m.scale.set(...s); m.position.set(...p); m.rotation.set(...r); parent.add(m); return m;
   };
-  const blob = (s, p, r, mat = mats.skin, parent = head) => add(parent, sphere, mat, s, p, r);
+  const blob = (s, p, r, mat = mats.skin, parent = head) => add(parent, mat === mats.skin ? lumpy : sphere, mat, s, p, r);
   // Back of the skull: two swellings along the neck axis, so the neck widens into the head
   const nape = (s, d, lift = 0) => blob(s, [0, NAPE.y * d + lift, NAPE.z * d], [HEAD_TILT, 0, 0]);
   nape([0.19, 0.17, 0.2], 0.07);
@@ -166,20 +104,23 @@ function buildHead(mats, lite) {
   blob([0.05, 0.03, 0.12], [0, 0.17, 0.2], [0.2, 0, 0]); // furrow between the brows
   // Eyes: a socket turned slightly outward holds an eyeball that rotates to follow the cursor.
   // The iris is emissive orange, the pupil a black vertical slit; the brow hoods the top.
-  const eyes = [], eyeballs = [];
+  const eyes = [], eyeballs = [], glass = [];
   for (const s of [-1, 1]) {
     const socket = new THREE.Group(); socket.position.set(s * 0.15, 0.088, 0.17); socket.rotation.set(0.05, s * 0.42, 0); head.add(socket);
     const ball = new THREE.Group(); socket.add(ball);
     const globe = new THREE.Mesh(sphere, mats.sclera); globe.scale.setScalar(0.056); ball.add(globe);
     const iris = new THREE.Mesh(sphere, mats.eye); iris.scale.set(0.046, 0.046, 0.016); iris.position.z = 0.046; ball.add(iris);
     const pupil = new THREE.Mesh(sphere, mats.dark); pupil.scale.set(0.009, 0.038, 0.008); pupil.position.z = 0.061; ball.add(pupil);
+    // Wet cornea: a clear glossy shell over the eye that catches a sharp highlight
+    const cornea = new THREE.Mesh(sphere, mats.cornea); cornea.scale.set(0.06, 0.06, 0.052); cornea.position.z = 0.012; ball.add(cornea);
+    glass.push(cornea);
     blob([0.075, 0.03, 0.06], [s * 0.15, 0.138, 0.18], [0.15, s * 0.42, s * 0.35]); // heavy upper lid under the brow
     eyes.push(iris); eyeballs.push({ socket, ball });
   }
   // Dark inner mouth
   blob([0.12, 0.022, 0.27], [0, -0.068, 0.3], [0, 0, 0], mats.mouth); // dark roof of the mouth (thin, so the open jaw shows the tongue)
   // Upper teeth with long fangs
-  const tooth = new THREE.ConeGeometry(1, 1, lite ? 5 : 7);
+  const tooth = fangGeometry(lite ? 6 : 12, lite ? 6 : 10);
   const teethPer = lite ? 3 : 5;
   for (const s of [-1, 1]) {
     add(head, tooth, mats.tooth, [0.024, 0.19, 0.024], [s * 0.085, -0.15, 0.52], [Math.PI - 0.12, 0, 0]);
@@ -206,7 +147,7 @@ function buildHead(mats, lite) {
   for (const s of [-1, 1]) {
     head.add(new THREE.Mesh(sweep([[s * 0.1, 0.17, -0.04], [s * 0.14, 0.24, -0.2], [s * 0.18, 0.31, -0.36], [s * 0.21, 0.42, -0.47], [s * 0.22, 0.56, -0.5]], taper(0.058, 0.007, 8), hornSegs, lite ? 8 : 12), mats.horn));
     // Cheek spikes
-    for (let k = 0; k < 3; k++) add(head, tooth, mats.fin, [0.045 - k * 0.008, 0.15 - k * 0.03, 0.045], [s * 0.24, -0.02 - k * 0.07, -0.08 - k * 0.03], [-1.9, 0, s * (0.75 + k * 0.2)]);
+    for (let k = 0; k < 3; k++) add(head, tooth, mats.horn, [0.045 - k * 0.008, 0.15 - k * 0.03, 0.045], [s * 0.24, -0.02 - k * 0.07, -0.08 - k * 0.03], [-1.9, 0, s * (0.75 + k * 0.2)]);
   }
 
   // Beard: a thick, shaggy mass of layered pointed tufts under the chin and lower jaw,
@@ -246,7 +187,7 @@ function buildHead(mats, lite) {
     m.userData.q0 = m.quaternion.clone();
     mane.add(m);
   }
-  return { head, eyes, eyeballs, jaw, beard, mane, cheeks };
+  return { head, eyes, eyeballs, glass, jaw, beard, mane, cheeks };
 }
 
 // ---------- Leg: a smooth muscular limb swept from inside the chest to the wrist, ending in a
@@ -254,7 +195,7 @@ function buildHead(mats, lite) {
 // tipped with a hooked talon ----------
 function buildLeg(mats, lite) {
   const g = new THREE.Group();
-  const N = lite ? 18 : 30, RADIAL = lite ? 10 : 16;
+  const N = lite ? 18 : 40, RADIAL = lite ? 10 : 22;
   // Dynamic limb skin, rebuilt along root -> shoulder -> elbow -> wrist every frame
   const count = (N + 1) * (RADIAL + 1);
   const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3), uv = new Float32Array(count * 2), idx = [];
@@ -285,12 +226,12 @@ function buildLeg(mats, lite) {
   };
 
   // Hand: palm faces +Z, fingers point +Y; curling a finger bends it toward the palm
-  const SEG = lite ? 8 : 14;
+  const SEG = lite ? 8 : 20;
   const sphere = new THREE.SphereGeometry(1, SEG, Math.round(SEG * 0.7));
   const foot = new THREE.Group(); g.add(foot);
   const pad = new THREE.Mesh(sphere, mats.toe); pad.scale.set(0.095, 0.085, 0.05); pad.position.y = 0.04; foot.add(pad);
   const bone = new THREE.CylinderGeometry(0.017, 0.023, 1, lite ? 6 : 9); bone.translate(0, 0.5, 0);
-  const talon = sweep([[0, 0, 0], [0, 0.07, 0.008], [0, 0.13, 0.04], [0, 0.165, 0.095], [0, 0.16, 0.15]], taper(0.03, 0.002), lite ? 10 : 18, lite ? 6 : 9);
+  const talon = sweep([[0, 0, 0], [0, 0.07, 0.008], [0, 0.13, 0.04], [0, 0.165, 0.095], [0, 0.16, 0.15]], taper(0.03, 0.0008), lite ? 10 : 26, lite ? 6 : 14);
   const toes = [];
   const makeToe = (x, y, spread, lens, thumb) => {
     const root = new THREE.Group(); root.position.set(x, y, 0.012); root.rotation.z = -spread; foot.add(root);
@@ -362,29 +303,31 @@ function solveElbow(S, T, a, b, pole) {
 
 // ---------- The dragon ----------
 export function createDragon({ lite = false } = {}) {
-  const L = lite ? 150 : 260;      // rings along the body
-  const RAD = lite ? 14 : 24;      // vertices around the body
+  const L = lite ? 150 : 400;      // rings along the body
+  const RAD = lite ? 14 : 36;      // vertices around the body
   const M = lite ? 64 : 96;        // collision nodes along the body
   const HEAD_SCALE = 2.4;
   const NECK_BASE = 0.86, NAPE_BEND = 0.95, NECK_SHARE = 0.6; // a head turn: 60% bends the neck, the rest the nape
   const FRONT = 0.85;              // where the front legs join the body: the top of the arch, just behind the neck
 
-  const maps = scaleMaps(lite ? 128 : 256);
+  const maps = scaleMaps(lite ? 256 : 512);
   const mats = {
     body: scaleMaterial(maps, { repeat: lite ? [30, 4] : [46, 6], vertexColors: true }),
-    skin: scaleMaterial(maps, { repeat: [5, 4], color: '#6a6a6a', normal: 1.2 }),
-    horn: rimify(new THREE.MeshStandardMaterial({ color: '#7A7A7A', metalness: 0.45, roughness: 0.55, envMapIntensity: 0.35 }), 0.35),
-    hair: rimify(new THREE.MeshStandardMaterial({ color: '#9a9a9a', vertexColors: true, metalness: 0.25, roughness: 0.85 }), 0.3),
-    tooth: new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.05, roughness: 0.38 }),
-    talon: rimify(new THREE.MeshStandardMaterial({ color: BONE, metalness: 0.1, roughness: 0.32 }), 0.4),
+    skin: scaleMaterial(maps, { repeat: [9, 7], color: '#6a6a6a', normal: 1.1 }),
+    horn: rimify(new THREE.MeshPhysicalMaterial({ color: '#7A7A7A', metalness: 0.3, roughness: 0.45, envMapIntensity: 0.5, clearcoat: 0.35, clearcoatRoughness: 0.3 }), 0.35),
+    hair: rimify(new THREE.MeshStandardMaterial({ color: '#9a9a9a', vertexColors: true, metalness: 0.15, roughness: 0.75 }), 0.3, 0.55),
+    // Ivory: slightly translucent, wet
+    tooth: rimify(new THREE.MeshPhysicalMaterial({ color: BONE, metalness: 0, roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.12 }), 0.15, 0.35),
+    talon: rimify(new THREE.MeshPhysicalMaterial({ color: '#cfc6b3', metalness: 0, roughness: 0.34, clearcoat: 0.55, clearcoatRoughness: 0.15, envMapIntensity: 0.45 }), 0.3, 0.25),
     limb: scaleMaterial(maps, { repeat: [7, 3], color: '#6a6a6a', normal: 1.3 }),
     toe: scaleMaterial(maps, { repeat: [3, 3], color: '#626262', normal: 1.6 }),
     sclera: new THREE.MeshStandardMaterial({ color: '#1a0e05', roughness: 0.35, metalness: 0.1 }),
-    tongue: new THREE.MeshStandardMaterial({ color: '#7e3328', roughness: 0.55 }),
+    cornea: new THREE.MeshPhysicalMaterial({ color: '#000000', transparent: true, opacity: 0.22, roughness: 0.03, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 2.5, depthWrite: false }),
+    tongue: rimify(new THREE.MeshPhysicalMaterial({ color: '#7e3328', roughness: 0.55, clearcoat: 0.3, clearcoatRoughness: 0.35 }), 0, 0.4),
     mouth: new THREE.MeshStandardMaterial({ color: '#0e0603', roughness: 0.95 }),
     dark: new THREE.MeshBasicMaterial({ color: '#000000' }),
     eye: new THREE.MeshBasicMaterial({ color: ORANGE.clone(), toneMapped: false }),
-    fin: rimify(new THREE.MeshStandardMaterial({ color: '#5a5a5a', metalness: 0.5, roughness: 0.6, envMapIntensity: 0.4, flatShading: true }), 0.7),
+    fin: rimify(new THREE.MeshPhysicalMaterial({ color: '#5a5a5a', metalness: 0.2, roughness: 0.5, envMapIntensity: 0.5, clearcoat: 0.3, clearcoatRoughness: 0.4, side: THREE.DoubleSide }), 0.7, 0.7),
   };
 
   // ---- Body buffers (index built once, positions rewritten per frame) ----
@@ -422,7 +365,7 @@ export function createDragon({ lite = false } = {}) {
 
   // Dorsal plates: short, thick, jagged triangles
   const FINS = lite ? 26 : 46;
-  const finGeo = new THREE.ConeGeometry(0.075, 0.22, 4, 5); finGeo.translate(0, 0.11, 0);
+  const finGeo = new THREE.ConeGeometry(0.075, 0.22, lite ? 5 : 10, lite ? 5 : 8); finGeo.scale(1, 1, 0.45); finGeo.translate(0, 0.11, 0);
   { // bend each spike back toward the tail (local -Z) so it reads as a curved fin
     const fp = finGeo.attributes.position;
     for (let i = 0; i < fp.count; i++) { const y = fp.getY(i) / 0.22; fp.setZ(i, fp.getZ(i) - 0.16 * y * y); }
@@ -433,7 +376,7 @@ export function createDragon({ lite = false } = {}) {
   const NMANE = lite ? 12 : 26;
   const neckMane = new THREE.InstancedMesh(tuftGeometry(lite ? 4 : 6, true), mats.hair, NMANE); neckMane.frustumCulled = false;
 
-  const { head, eyes, eyeballs, jaw, beard, mane, cheeks } = buildHead(mats, lite);
+  const { head, eyes, eyeballs, glass, jaw, beard, mane, cheeks } = buildHead(mats, lite);
   head.scale.setScalar(HEAD_SCALE);
   const headRoot = new THREE.Group(); headRoot.add(head); headRoot.matrixAutoUpdate = false;
 
@@ -655,7 +598,7 @@ export function createDragon({ lite = false } = {}) {
   let nextSnarl = 4, snarlStart = -10, lastT = null;
   const arriveEase = a => 1 - Math.pow(1 - a, 2.3);
   return {
-    group, eyes, jaw,
+    group, eyes, jaw, glass,
     eyeMaterial: mats.eye,
     // t: seconds; intro: 0..1 arrival progress (linear in time); look: {x,y} -1..1 smoothed pointer;
     // eyeTarget: world point the eyes should look at (the cursor, or the viewer); aim: {x,y} -1..1 raw
