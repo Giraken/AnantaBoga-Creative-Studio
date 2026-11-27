@@ -127,6 +127,15 @@
     });
   });
 
+  // About photos: black and white, colouring in once scrolled a little further
+  document.querySelectorAll('.about-shot img').forEach(img => {
+    ScrollTrigger.create({
+      // Stays black and white until the photo is well up the screen, then colours in as it nears the middle
+      trigger: img, start: 'top 48%', end: 'top 18%', scrub: true,
+      onUpdate: self => img.style.setProperty('--bw', (1 - self.progress).toFixed(3)),
+    });
+  });
+
   // Counters
   document.querySelectorAll('[data-count]').forEach(el => {
     const to = +el.dataset.count, suf = el.dataset.suffix || '';
@@ -173,25 +182,34 @@
   const stage = document.querySelector('.svc-stage');
   const bar = document.querySelector('.svc-progress');
   const hint = document.querySelector('.svc-hint');
-  // The photos come in waves of three: the hero's fifteen shots are five waves
+  // One cluster of nine photos round the title, each a step deeper than the last; the camera
+  // flies through them in a short pin
   const shots = stage ? [...stage.querySelectorAll('.svc-shots img')] : [];
   if (pin && stage && shots.length) {
-    const N = Math.ceil(shots.length / 3);
+    const STEP = 240;                              // depth between one photo and the next
+    const DEPTH = 150 + (shots.length - 1) * STEP;  // where the farthest photo starts
+    const TRAVEL = DEPTH + 950;                     // camera travel until it has flown past
     const warp = document.createElement('div');
     warp.className = 'warp'; warp.setAttribute('aria-hidden', 'true');
     stage.prepend(warp);
-    // Where each of a service's three shots hangs: angle round the title, distance out, size, tilt
+    // Where each photo hangs: angle round the title, distance out, size, tilt. Neighbours in depth
+    // sit far apart round the ring, so the cluster reads evenly from the first frame
     const SLOTS = [
-      { a: -2.5, r: 1.0, w: 1.0, rot: -6, wide: false },
-      { a: -0.45, r: 0.95, w: 0.86, rot: 5, wide: true },
-      { a: 1.55, r: 1.05, w: 0.92, rot: -3, wide: false },
+      { a: -2.55, r: 1.22, w: 1.00, rot: -6, wide: false },
+      { a: -0.35, r: 1.02, w: 0.86, rot: 5, wide: true },
+      { a: 1.75, r: 0.98, w: 0.92, rot: -3, wide: false },
+      { a: -1.45, r: 1.08, w: 0.84, rot: 4, wide: true },
+      { a: 0.65, r: 1.10, w: 0.90, rot: -5, wide: false },
+      { a: 2.75, r: 1.04, w: 0.88, rot: 6, wide: true },
+      { a: -0.95, r: 0.92, w: 0.94, rot: -4, wide: false },
+      { a: 1.20, r: 0.95, w: 0.82, rot: 3, wide: true },
+      { a: -2.95, r: 1.12, w: 0.90, rot: -2, wide: false },
     ];
     const label = src => decodeURIComponent(src.split('/').pop().replace(/\.\w+$/, '')).replace(/[-_]+/g, ' ');
     const cards = [];
     shots.forEach((img, n) => {
       {
-        const i = Math.floor(n / 3), k = n % 3;
-        const slot = SLOTS[k];
+        const slot = SLOTS[n % SLOTS.length];
         const fig = document.createElement('figure');
         fig.className = 'warp-card' + (slot.wide ? ' wide' : '');
         const im = document.createElement('img');
@@ -200,13 +218,11 @@
         cap.textContent = label(img.getAttribute('src'));
         fig.append(im, cap);
         warp.append(fig);
-        // Turn each service's ring of shots a little so the five clusters don't line up
-        cards.push({ el: fig, i, k, a: slot.a + i * 0.95, r: slot.r, w: slot.w * (slot.wide ? 1.25 : 1), rot: slot.rot, shown: false });
+        cards.push({ el: fig, n, a: slot.a, r: slot.r, w: slot.w * (slot.wide ? 1.25 : 1), rot: slot.rot, shown: false });
       }
     });
 
     const P = 1000;        // perspective, px
-    const GAP = 1500;      // depth between one service and the next
     let target = 0, cam = 0, last = 0, raf = 0, live = false;
     let mx = 0, my = 0, px = 0, py = 0;
     let W = 0, H = 0, R = 0, RY = 0;
@@ -226,16 +242,14 @@
       px += (mx - px) * (1 - Math.exp(-dt * 4)); py += (my - py) * (1 - Math.exp(-dt * 4));
       const t = now / 1000;
       for (const c of cards) {
-        // Each service's cluster starts a GAP further away; its first shot reaches the title plane
-        // as the camera gets a quarter of the way into that service
-        const z = cam - (c.i * GAP + c.k * GAP / 3) - GAP * 0.25;
+        const z = cam - 150 - c.n * STEP;
         const far = Math.min(1, Math.max(0, (z + 3600) / 1500));
         const near = Math.min(1, Math.max(0, (P * 0.8 - z) / (P * 0.35)));
         // Shots behind the title stay a little dimmer, so the front ones read as closer
         const o = far * near * (z < 0 ? 0.55 + 0.45 * Math.max(0, 1 + z / 1500) : 1);
         if (o <= 0.001) { if (c.shown) { c.el.style.visibility = 'hidden'; c.shown = false; } continue; }
         if (!c.shown) { c.el.style.visibility = 'visible'; c.shown = true; }
-        const a = c.a + Math.sin(t * 0.25 + c.i + c.k) * 0.04;
+        const a = c.a + Math.sin(t * 0.25 + c.n) * 0.04;
         const x = Math.cos(a) * R * c.r - px * 60 * (1 + z / P);
         const y = Math.sin(a) * RY * c.r - py * 40 * (1 + z / P);
         c.el.style.width = 'calc(var(--cw) * ' + c.w + ')';
@@ -243,19 +257,18 @@
         c.el.style.opacity = o.toFixed(3);
         c.el.style.zIndex = z > -60 ? 3 : 1;
       }
-      if (panels.length > 1) setSvc(Math.max(0, Math.min(panels.length - 1, Math.floor(cam / GAP))));
-      if (hint) hint.style.opacity = Math.max(0, 1 - cam / (GAP * 0.35)).toFixed(3);
+      if (hint) hint.style.opacity = Math.max(0, 1 - cam / 500).toFixed(3);
       raf = live || Math.abs(target - cam) > 0.5 ? requestAnimationFrame(frame) : 0;
     };
     const run = () => { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } };
 
     ScrollTrigger.create({
-      trigger: pin, start: 'top top', end: () => '+=' + window.innerHeight * (N - 0.2), pin: true, invalidateOnRefresh: true,
+      trigger: pin, start: 'top top', end: () => '+=' + window.innerHeight * 1.6, pin: true, invalidateOnRefresh: true,
       refreshPriority: 1, // measured first: everything below starts after its pinned stretch
       onUpdate: self => {
         bar?.style.setProperty('--p', self.progress.toFixed(3));
-        // Run a little past the last service, so its shots fly off before the pin lets go
-        target = self.progress * (N + 0.35) * GAP;
+        // Fly past the farthest photo before the pin lets go
+        target = self.progress * TRAVEL;
         run();
       },
       onToggle: self => { live = self.isActive; run(); },
