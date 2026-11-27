@@ -1,0 +1,184 @@
+/* 3D hero, laid out as an editorial poster. CSS places every piece; the 3D scene reads these
+   boxes (.dragon-anchor, .pg-*, .poster-head) and paints the grid and headline into the scene
+   so the dragon can sit in front of some letters and behind others. */
+.hero3d {
+  --orange: #FF9800;
+  --dragon-gray: #7A7A7A;
+  --light-gray: #A0A0A0;
+  --black: #0C0C0C;
+  --white: #FBF6EE;
+  --grid: #1E1E1E;
+  --ring-line: #1B1B1B;
+  --edge: clamp(20px, 3.9vw, 56px);
+  position: relative; height: 100svh; min-height: 680px; max-height: 1100px;
+  background: var(--black); overflow: hidden; isolation: isolate;
+}
+.hero-stage-wrap { position: absolute; inset: 0; }
+
+/* Scroll exit. On wide screens the hero stays pinned for --pin of scrolling while the dragon loops away
+   to the left and the headline slides apart (js/hero/overlay.js turns the scroll into --exit / --words);
+   then the page carries on. Phones and reduced motion scroll straight through, and so does the page
+   if the hero script never runs (it adds .is-live). */
+.hero-pin { position: relative; --pin: 70svh; }
+@media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+  .hero-pin.is-live { height: calc(clamp(680px, 100svh, 1100px) + var(--pin)); }
+  .hero-pin.is-live > .hero3d { position: sticky; top: min(0px, calc(100svh - clamp(680px, 100svh, 1100px))); }
+}
+
+/* Grid panels and the faint circles behind the dragon */
+.pg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.pg-line { position: absolute; background: var(--grid); }
+.pg-line.v { top: 0; bottom: 0; width: 1px; }
+.pg-line.h { left: 0; right: 0; height: 1px; }
+.pg-line.v1 { left: 25%; } .pg-line.v2 { left: 50%; } .pg-line.v3 { left: 75%; }
+.pg-line.h1 { top: 72px; } .pg-line.h2 { bottom: 64px; }
+.pg-circle { position: absolute; left: 50%; top: 47%; aspect-ratio: 1; border: 1px solid var(--ring-line); border-radius: 50%; transform: translate(-50%, -50%); }
+.pg-circle.c1 { width: calc(var(--hero-h, 100svh) * .46); }
+.pg-circle.c2 { width: calc(var(--hero-h, 100svh) * .7); }
+.pg-circle.c3 { width: calc(var(--hero-h, 100svh) * .96); }
+
+/* The dragon is fitted into this box */
+.dragon-anchor {
+  position: absolute; left: 50%; top: 47%; width: min(calc(var(--hero-h, 100svh) * .8), 54vw); aspect-ratio: 1;
+  transform: translate(-50%, -50%); pointer-events: none;
+}
+.hero3d-stage { position: absolute; inset: 0; z-index: 1; }
+.hero3d-stage canvas { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease; }
+.hero3d.has-scene .hero3d-stage canvas { opacity: 1; }
+
+/* Still of the dragon, shown until the scene is ready (and kept if WebGL is missing) */
+.hero3d-fallback {
+  position: absolute; z-index: 1; left: 50%; top: 47%; width: min(calc(var(--hero-h, 100svh) * .8), 54vw);
+  height: auto; aspect-ratio: 1; transform: translate(-50%, -50%); transition: opacity .9s ease;
+  /* soften the square edge of the still into the page black */
+  -webkit-mask-image: radial-gradient(#000 62%, transparent 100%); mask-image: radial-gradient(#000 62%, transparent 100%);
+}
+.hero3d.has-scene .hero3d-fallback { opacity: 0; }
+/* Without WebGL the still spins away to the left on scroll, like the dragon does */
+.hero3d.no-scene .hero3d-fallback { transform: translate(calc(-50% - var(--exit, 0) * 75vw), -50%) rotate(calc(var(--exit, 0) * -160deg)); }
+
+/* Headline: Endless / Possibilities, set in Plus Jakarta Sans Extra Bold like the brand boards, one row each, with an orange block behind each row. Where the
+   letters cross a block they turn black: each row's text is clipped from a white fill with a black
+   rectangle that sits exactly over its block (same percentages of the same box). On scroll the
+   rows slide apart, ENDLESS off to the left and POSSIBILITIES off to the right. */
+.poster-head {
+  position: absolute; z-index: 2; left: var(--edge); right: var(--edge); bottom: 76px;
+  margin: 0; pointer-events: none;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif; font-weight: 800;
+  font-size: clamp(76px, min(14.6vw, 25vh), 270px); line-height: .9; letter-spacing: -.05em;
+}
+.ph-row { position: relative; display: block; }
+.ph-r1 { transform: translateX(calc(var(--words, 0) * (-100% - var(--edge)))); }
+.ph-r2 { transform: translateX(calc(var(--words, 0) * (100% + var(--edge)))); }
+.is-measuring .ph-row { transform: none !important; } /* the 3D copy is painted from the unmoved layout */
+.poster-block { position: absolute; background: var(--orange); }
+.poster-block.pb1 { left: 0; top: 12%; width: 11%; height: 80%; }
+.poster-block.pb2 { left: 59%; top: 0; width: 25%; height: 92%; }
+.ph-text {
+  position: relative; display: block; color: transparent;
+  background-image: linear-gradient(#000, #000), linear-gradient(#fff, #fff);
+  background-repeat: no-repeat;
+  -webkit-background-clip: text; background-clip: text;
+}
+.ph-r1 .ph-text { background-size: 11% 80%, 100% 100%; background-position: 0% 60%, 0 0; }
+.ph-r2 .ph-text { background-size: 25% 92%, 100% 100%; background-position: 78.67% 0%, 0 0; }
+.ph-line { display: block; width: fit-content; white-space: nowrap; } /* one line each: the 3D copy paints each row as a single line */
+.ph-line.ph-l2 { margin-left: auto; }
+.hero3d.has-scene .pg, .hero3d.has-scene .poster-block, .hero3d.has-scene .ph-text { opacity: 0; }
+
+/* Small details in the grid cells */
+.pg-label { position: absolute; z-index: 3; margin: 0; font-size: 14px; font-weight: 600; color: var(--dragon-gray); letter-spacing: -.01em; }
+.pg-label.lb1 { top: 90px; left: calc(25% + 16px); }
+.pg-label.lb2 { top: 90px; left: calc(75% + 16px); }
+.pg-label.lb3 { bottom: 22px; left: calc(50% + 16px); }
+/* The studio's one-line introduction, in the empty top-left cell of the grid */
+.hero-intro {
+  position: absolute; z-index: 3; top: 108px; left: var(--edge); width: calc(25% - var(--edge) - 28px); margin: 0;
+  font-size: clamp(22px, 1.75vw, 34px); font-weight: 700; line-height: 1.18; letter-spacing: -.035em; color: var(--white); text-wrap: balance;
+}
+.hero-intro em { font-style: normal; color: var(--orange); }
+.side-name {
+  position: absolute; z-index: 3; left: 14px; top: 50%; margin: 0;
+  writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg);
+  font-size: 14px; font-weight: 800; letter-spacing: .3em; color: var(--dragon-gray);
+}
+.page-dots { position: absolute; z-index: 3; left: var(--edge); bottom: 20px; display: flex; gap: 18px; }
+.page-dots a { font-size: 13px; font-weight: 700; color: var(--dragon-gray); text-decoration: none; font-variant-numeric: tabular-nums; }
+.page-dots a:hover { color: var(--white); }
+.page-dots a.is-active { color: var(--orange); }
+
+/* Side columns over the stage */
+.hero-side { position: absolute; z-index: 4; top: 17%; width: min(250px, 19vw); }
+.hero-left { left: var(--edge); }
+.hero-right { right: var(--edge); }
+
+.hero-card { position: relative; background: #111111; }
+.hero-card img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+.hero-card p { margin: 0; padding: 14px 16px 18px; font-size: 14px; line-height: 1.5; color: #cfcfcf; }
+.card-tab {
+  position: absolute; right: 0; bottom: 0; transform: translateY(50%);
+  display: grid; place-items: center; width: 56px; height: 56px; background: var(--orange); text-decoration: none;
+}
+.card-tab span { display: grid; place-items: center; width: 36px; height: 36px; background: var(--black); color: var(--orange); transition: transform .2s; }
+.card-tab:hover span { transform: rotate(-45deg); }
+.card-tab svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.hero-services { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--grid); }
+.hero-services li { border-bottom: 1px solid var(--grid); }
+.hero-services a {
+  display: flex; align-items: baseline; gap: 14px; padding: 12px 0; text-decoration: none;
+  font-size: clamp(18px, 1.6vw, 22px); font-weight: 600; letter-spacing: -.035em; color: var(--dragon-gray); transition: color .2s;
+}
+.hero-services a span { font-size: 12px; font-weight: 700; color: var(--dragon-gray); font-variant-numeric: tabular-nums; }
+.hero-services li.is-active a { color: var(--white); font-weight: 800; }
+.hero-services li.is-active a span { color: var(--orange); }
+.hero-services a:hover { color: var(--white); }
+.hero-stat { margin: 18px 0 0; color: var(--light-gray); font-size: 14px; }
+.hero-stat b { display: block; color: var(--orange); font-size: 46px; font-weight: 800; letter-spacing: -.06em; line-height: 1; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.hero-actions .btn { min-height: 44px; padding: 10px 18px; font-size: 15px; }
+
+/* Entrance */
+.hero-side, .pg-label, .hero-intro, .side-name, .page-dots { opacity: 0; transform: translateY(10px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.hero3d.is-in .hero-side, .hero3d.is-in .pg-label, .hero3d.is-in .hero-intro, .hero3d.is-in .side-name, .hero3d.is-in .page-dots { opacity: 1; transform: none; }
+.hero3d.is-in .side-name { transform: translateY(-50%) rotate(180deg); }
+.hero3d.is-in .hero-right { transition-delay: .15s; }
+
+/* Capture mode (?capture): only the dragon, for saving the fallback still */
+.hero3d.is-capture .hero-side, .hero3d.is-capture .pg-label, .hero3d.is-capture .hero-intro, .hero3d.is-capture .side-name,
+.hero3d.is-capture .page-dots, .hero3d.is-capture .poster-head, .hero3d.is-capture .pg { display: none; }
+
+/* Mobile: top bar, dragon, headline over it, then services, then the card */
+@media (max-width: 900px) {
+  .hero3d { height: auto; max-height: none; min-height: 0; display: flex; flex-direction: column; }
+  .hero-stage-wrap { position: relative; inset: auto; height: min(148vw, 90svh); min-height: 520px; }
+  .pg-line.v1, .pg-line.v3, .pg-label, .side-name, .page-dots, .pg-circle.c3 { display: none; }
+  .pg-line.h1 { top: 64px; } .pg-line.h2 { display: none; }
+  .dragon-anchor, .hero3d-fallback { top: 53%; width: min(86vw, 58svh); }
+  .pg-circle { top: 53%; }
+  .pg-circle.c1 { width: 58vw; } .pg-circle.c2 { width: 88vw; }
+  .poster-head { left: 14px; right: 14px; bottom: 18px; font-size: calc((100vw - 34px) / 5.3); }
+  .hero-intro { top: 80px; left: 16px; right: 16px; width: auto; font-size: clamp(19px, 5.4vw, 24px); line-height: 1.2; text-wrap: pretty; }
+  .hero-side { position: static; width: auto; margin: 0 16px; }
+  .hero-right { order: 1; margin-top: 24px; margin-bottom: 48px; }
+  .hero-left { order: 2; margin-top: 28px; margin-bottom: 56px; }
+  .hero-services a { font-size: 22px; }
+  .hero-actions .btn { flex: 1 1 0; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-side, .pg-label, .hero-intro, .side-name, .page-dots, .hero3d-stage canvas, .hero3d-fallback { transition: none; }
+}
+
+/* "Let's work together" band before the contact section */
+.together { display: block; overflow: hidden; border-block: 1px solid rgba(255,255,255,.16); text-decoration: none; color: var(--white, #fff); }
+.together-track { display: flex; width: max-content; animation: together 38s linear infinite; }
+.together span {
+  padding: 26px 0; font-size: clamp(36px, 6vw, 88px); font-weight: 800; font-variation-settings: "wdth" 68;
+  line-height: 1; white-space: nowrap;
+}
+.together span::after { content: ""; display: inline-block; width: .32em; height: .32em; margin: 0 .5em; border-radius: 50%; background: #F7991F; vertical-align: middle; }
+.together:hover span { color: #F7991F; }
+.together:hover .together-track { animation-play-state: paused; }
+@keyframes together { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .together-track { animation: none; } }

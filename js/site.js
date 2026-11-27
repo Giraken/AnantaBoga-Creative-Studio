@@ -59,6 +59,25 @@
     document.fonts?.ready.then(placeThumb);
   }
 
+  // Work: an accordion of the five kinds of film. Pointing at a strip (or clicking, tapping, or
+  // pressing Enter on it) opens it; the open one shows its photo, what it is and what it includes.
+  const accItems = [...document.querySelectorAll('.acc-item')];
+  const openAcc = item => accItems.forEach(it => {
+    const on = it === item;
+    it.classList.toggle('is-open', on);
+    it.querySelector('.acc-tab')?.setAttribute('aria-expanded', on);
+  });
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+  let accTimer = 0;
+  accItems.forEach(it => {
+    it.querySelector('.acc-tab')?.addEventListener('click', () => openAcc(it));
+    it.addEventListener('pointerenter', () => {
+      if (!fine.matches || window.innerWidth <= 760) return;
+      clearTimeout(accTimer); accTimer = setTimeout(() => openAcc(it), 90);
+    });
+    it.addEventListener('pointerleave', () => clearTimeout(accTimer));
+  });
+
   // Split statements into words
   const statements = [...document.querySelectorAll('[data-words]')];
   statements.forEach(el => {
@@ -84,12 +103,27 @@
   const { gsap, ScrollTrigger } = window;
   gsap.registerPlugin(ScrollTrigger);
 
-  // Statements light up word by word as they scroll through the middle of the screen
+  // Statements light up word by word as they come up the screen, and are fully lit by the time
+  // they sit in view (their middle a little below the centre of the screen)
+  // How much of a statement is lit, by scroll progress (top of the text from 96% down the screen to 29%).
+  // Tuned by eye: about a third lit with its top 70% down, 17 of 27 words halfway, 23 at 35%, all at 29%.
+  const LIT = [[0, 0], [0.388, 0.36], [0.687, 0.61], [0.91, 0.84], [1, 1]];
+  const lit = p => {
+    for (let i = 1; i < LIT.length; i++) {
+      const [x0, y0] = LIT[i - 1], [x1, y1] = LIT[i];
+      if (p <= x1) return y0 + (y1 - y0) * (p - x0) / (x1 - x0);
+    }
+    return 1;
+  };
   statements.forEach(el => {
     const words = [...el.querySelectorAll('.w')];
     ScrollTrigger.create({
-      trigger: el, start: 'top 85%', end: 'bottom 45%', scrub: true,
-      onUpdate: self => { const n = Math.round(self.progress * words.length); words.forEach((w, k) => w.classList.toggle('on', k < n)); },
+      trigger: el, start: 'top 96%', end: 'top 29%', scrub: true,
+      onUpdate: self => {
+        const p = self.progress, f = lit(p);
+        const n = p > 0.97 ? words.length : Math.ceil(f * words.length);
+        words.forEach((w, k) => w.classList.toggle('on', k < n));
+      },
     });
   });
 
@@ -139,8 +173,10 @@
   const stage = document.querySelector('.svc-stage');
   const bar = document.querySelector('.svc-progress');
   const hint = document.querySelector('.svc-hint');
-  if (pin && stage && panels.length) {
-    const N = panels.length;
+  // The photos come in waves of three: the hero's fifteen shots are five waves
+  const shots = stage ? [...stage.querySelectorAll('.svc-shots img')] : [];
+  if (pin && stage && shots.length) {
+    const N = Math.ceil(shots.length / 3);
     const warp = document.createElement('div');
     warp.className = 'warp'; warp.setAttribute('aria-hidden', 'true');
     stage.prepend(warp);
@@ -152,8 +188,9 @@
     ];
     const label = src => decodeURIComponent(src.split('/').pop().replace(/\.\w+$/, '')).replace(/[-_]+/g, ' ');
     const cards = [];
-    panels.forEach((panel, i) => {
-      [...panel.querySelectorAll('.svc-shots img')].slice(0, 3).forEach((img, k) => {
+    shots.forEach((img, n) => {
+      {
+        const i = Math.floor(n / 3), k = n % 3;
         const slot = SLOTS[k];
         const fig = document.createElement('figure');
         fig.className = 'warp-card' + (slot.wide ? ' wide' : '');
@@ -165,7 +202,7 @@
         warp.append(fig);
         // Turn each service's ring of shots a little so the five clusters don't line up
         cards.push({ el: fig, i, k, a: slot.a + i * 0.95, r: slot.r, w: slot.w * (slot.wide ? 1.25 : 1), rot: slot.rot, shown: false });
-      });
+      }
     });
 
     const P = 1000;        // perspective, px
@@ -206,7 +243,7 @@
         c.el.style.opacity = o.toFixed(3);
         c.el.style.zIndex = z > -60 ? 3 : 1;
       }
-      setSvc(Math.max(0, Math.min(N - 1, Math.floor(cam / GAP))));
+      if (panels.length > 1) setSvc(Math.max(0, Math.min(panels.length - 1, Math.floor(cam / GAP))));
       if (hint) hint.style.opacity = Math.max(0, 1 - cam / (GAP * 0.35)).toFixed(3);
       raf = live || Math.abs(target - cam) > 0.5 ? requestAnimationFrame(frame) : 0;
     };
@@ -214,6 +251,7 @@
 
     ScrollTrigger.create({
       trigger: pin, start: 'top top', end: () => '+=' + window.innerHeight * (N - 0.2), pin: true, invalidateOnRefresh: true,
+      refreshPriority: 1, // measured first: everything below starts after its pinned stretch
       onUpdate: self => {
         bar?.style.setProperty('--p', self.progress.toFixed(3));
         // Run a little past the last service, so its shots fly off before the pin lets go
@@ -250,6 +288,8 @@
     }).observe(document.body);
   }
   // Re-measure once the 3D hero has settled its pin height and fonts are in
+  // Measure in page order now that every trigger exists (the hero pin first), then again after load
+  ScrollTrigger.sort(); ScrollTrigger.refresh();
   window.addEventListener('load', () => setTimeout(() => ScrollTrigger.refresh(), 400));
   document.fonts?.ready.then(() => ScrollTrigger.refresh());
 })();

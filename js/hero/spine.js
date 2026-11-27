@@ -37,7 +37,7 @@ export const REST = [
 // Direction the neck travels into the head at rest (down toward the viewer); sets the head's facing
 export const NECK_END = V(-0.306, -0.724, 0.618).normalize();
 
-// Up from far below the frame (x = -4.7, under the "FORGED IN" headline), then a quarter turn into the
+// Up from far below the frame (x = -4.7, under the "ENDLESS" headline), then a quarter turn into the
 // tail, which points right along the bottom. GATE_IN is where the head waits before the intro: below the frame.
 function entryKeys() {
   return [V(-4.7, -40, 0.6), V(-4.7, -26, 0.6), V(-4.7, -14, 0.6), V(-4.7, -8.5, 0.6), V(-4.7, -5.6, 0.57),

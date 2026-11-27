@@ -1,6 +1,6 @@
 // Scene: renderer, camera, the double orange ring, lights, bloom, intro timeline, the poster
 // planes (grid and headline), pointer tilt and eye tracking, and the scroll exit (the dragon loops
-// away to the left while FORGED IN slides off left and LEGEND off right).
+// away to the left while ENDLESS slides off left and POSSIBILITIES off right).
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -206,7 +206,7 @@ export function startScene(host, { lite = false, still = false, root = host.pare
   // replays the arrival (it rises from below again) instead of reversing the flight.
   const REPLAY_AT = 0.35;
   let gone = leave > 0.98, introStart = 0, replayBase = 0;
-  // Words come in at the start (FORGED IN from the left, LEGEND from the right) and again on a replay
+  // Words come in at the start (ENDLESS from the left, POSSIBILITIES from the right) and again on a replay
   const WORDS_IN = [0.25, 1.45];
   let wordsFrom = 1, slid = 1; // a replay slides the words in from wherever they are
   let sized = '';
@@ -280,6 +280,17 @@ export function startScene(host, { lite = false, still = false, root = host.pare
   const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; visible ? play() : pause(); });
   io.observe(host);
   document.addEventListener('visibilitychange', () => (document.hidden ? pause() : play()));
+  // Belt and braces: also check on every scroll, so the loop always wakes when the hero comes back
+  // (e.g. "Back to top" from the footer) even if the observer missed the change
+  const check = () => {
+    const r = host.getBoundingClientRect();
+    const v = r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
+    if (v !== visible) { visible = v; v ? play() : pause(); }
+    else if (v && !running) play();
+  };
+  window.addEventListener('scroll', check, { passive: true });
+  window.addEventListener('pageshow', check);
+  window.addEventListener('focus', check);
 
   const ready = poster.rebuild().then(() => {
     // Compile every shader now, so the first animated frames don't stall

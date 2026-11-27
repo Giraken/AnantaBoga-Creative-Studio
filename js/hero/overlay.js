@@ -1,6 +1,6 @@
 // UI overlay: staged text entrance, the swap from the static logo fallback to the live scene, and the
-// scroll progress through the hero that drives the exit (the dragon loops away to the left, FORGED IN
-// slides off left, LEGEND off right).
+// scroll progress through the hero that drives the exit (the dragon loops away to the left, ENDLESS
+// slides off left, POSSIBILITIES off right).
 export function createOverlay(hero) {
   const fallback = hero.querySelector('.hero3d-fallback');
   const stageEl = hero.querySelector('.hero3d-stage');
@@ -33,7 +33,7 @@ export function createOverlay(hero) {
     hero.style.setProperty('--exit', exit.toFixed(4));
     hero.style.setProperty('--words', words.toFixed(4));
   };
-  // FORGED IN slides in from the left and LEGEND from the right
+  // ENDLESS slides in from the left and POSSIBILITIES from the right
   const wordsIn = () => {
     if (reduce) return;
     const t0 = performance.now();

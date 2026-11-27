@@ -57,10 +57,10 @@
 /* Without WebGL the still spins away to the left on scroll, like the dragon does */
 .hero3d.no-scene .hero3d-fallback { transform: translate(calc(-50% - var(--exit, 0) * 75vw), -50%) rotate(calc(var(--exit, 0) * -160deg)); }
 
-/* Headline: Forged in / Legend, set in Plus Jakarta Sans Extra Bold like the brand boards, one row each, with an orange block behind each row. Where the
+/* Headline: Endless / Possibilities, set in Plus Jakarta Sans Extra Bold like the brand boards, one row each, with an orange block behind each row. Where the
    letters cross a block they turn black: each row's text is clipped from a white fill with a black
    rectangle that sits exactly over its block (same percentages of the same box). On scroll the
-   rows slide apart, FORGED IN off to the left and LEGEND off to the right. */
+   rows slide apart, ENDLESS off to the left and POSSIBILITIES off to the right. */
 .poster-head {
   position: absolute; z-index: 2; left: var(--edge); right: var(--edge); bottom: 76px;
   margin: 0; pointer-events: none;
@@ -72,17 +72,17 @@
 .ph-r2 { transform: translateX(calc(var(--words, 0) * (100% + var(--edge)))); }
 .is-measuring .ph-row { transform: none !important; } /* the 3D copy is painted from the unmoved layout */
 .poster-block { position: absolute; background: var(--orange); }
-.poster-block.pb1 { left: 0; top: 12%; width: 13%; height: 80%; }
-.poster-block.pb2 { left: 56%; top: 0; width: 34%; height: 92%; }
+.poster-block.pb1 { left: 0; top: 12%; width: 11%; height: 80%; }
+.poster-block.pb2 { left: 59%; top: 0; width: 25%; height: 92%; }
 .ph-text {
   position: relative; display: block; color: transparent;
   background-image: linear-gradient(#000, #000), linear-gradient(#fff, #fff);
   background-repeat: no-repeat;
   -webkit-background-clip: text; background-clip: text;
 }
-.ph-r1 .ph-text { background-size: 13% 80%, 100% 100%; background-position: 0% 60%, 0 0; }
-.ph-r2 .ph-text { background-size: 34% 92%, 100% 100%; background-position: 84.85% 0%, 0 0; }
-.ph-line { display: block; width: fit-content; }
+.ph-r1 .ph-text { background-size: 11% 80%, 100% 100%; background-position: 0% 60%, 0 0; }
+.ph-r2 .ph-text { background-size: 25% 92%, 100% 100%; background-position: 78.67% 0%, 0 0; }
+.ph-line { display: block; width: fit-content; white-space: nowrap; } /* one line each: the 3D copy paints each row as a single line */
 .ph-line.ph-l2 { margin-left: auto; }
 .hero3d.has-scene .pg, .hero3d.has-scene .poster-block, .hero3d.has-scene .ph-text { opacity: 0; }
 
@@ -91,6 +91,12 @@
 .pg-label.lb1 { top: 90px; left: calc(25% + 16px); }
 .pg-label.lb2 { top: 90px; left: calc(75% + 16px); }
 .pg-label.lb3 { bottom: 22px; left: calc(50% + 16px); }
+/* The studio's one-line introduction, in the empty top-left cell of the grid */
+.hero-intro {
+  position: absolute; z-index: 3; top: 108px; left: var(--edge); width: calc(25% - var(--edge) - 28px); margin: 0;
+  font-size: clamp(22px, 1.75vw, 34px); font-weight: 700; line-height: 1.18; letter-spacing: -.035em; color: var(--white); text-wrap: balance;
+}
+.hero-intro em { font-style: normal; color: var(--orange); }
 .side-name {
   position: absolute; z-index: 3; left: 14px; top: 50%; margin: 0;
   writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg);
@@ -133,25 +139,26 @@
 .hero-actions .btn { min-height: 44px; padding: 10px 18px; font-size: 15px; }
 
 /* Entrance */
-.hero-side, .pg-label, .side-name, .page-dots { opacity: 0; transform: translateY(10px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
-.hero3d.is-in .hero-side, .hero3d.is-in .pg-label, .hero3d.is-in .side-name, .hero3d.is-in .page-dots { opacity: 1; transform: none; }
+.hero-side, .pg-label, .hero-intro, .side-name, .page-dots { opacity: 0; transform: translateY(10px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.hero3d.is-in .hero-side, .hero3d.is-in .pg-label, .hero3d.is-in .hero-intro, .hero3d.is-in .side-name, .hero3d.is-in .page-dots { opacity: 1; transform: none; }
 .hero3d.is-in .side-name { transform: translateY(-50%) rotate(180deg); }
 .hero3d.is-in .hero-right { transition-delay: .15s; }
 
 /* Capture mode (?capture): only the dragon, for saving the fallback still */
-.hero3d.is-capture .hero-side, .hero3d.is-capture .pg-label, .hero3d.is-capture .side-name,
+.hero3d.is-capture .hero-side, .hero3d.is-capture .pg-label, .hero3d.is-capture .hero-intro, .hero3d.is-capture .side-name,
 .hero3d.is-capture .page-dots, .hero3d.is-capture .poster-head, .hero3d.is-capture .pg { display: none; }
 
 /* Mobile: top bar, dragon, headline over it, then services, then the card */
 @media (max-width: 900px) {
   .hero3d { height: auto; max-height: none; min-height: 0; display: flex; flex-direction: column; }
-  .hero-stage-wrap { position: relative; inset: auto; height: min(132vw, 88svh); min-height: 480px; }
+  .hero-stage-wrap { position: relative; inset: auto; height: min(148vw, 90svh); min-height: 520px; }
   .pg-line.v1, .pg-line.v3, .pg-label, .side-name, .page-dots, .pg-circle.c3 { display: none; }
   .pg-line.h1 { top: 64px; } .pg-line.h2 { display: none; }
-  .dragon-anchor, .hero3d-fallback { top: 44%; width: min(92vw, 62svh); }
-  .pg-circle { top: 44%; }
+  .dragon-anchor, .hero3d-fallback { top: 53%; width: min(86vw, 58svh); }
+  .pg-circle { top: 53%; }
   .pg-circle.c1 { width: 58vw; } .pg-circle.c2 { width: 88vw; }
-  .poster-head { left: 14px; right: 14px; bottom: 18px; font-size: 21.5vw; }
+  .poster-head { left: 14px; right: 14px; bottom: 18px; font-size: calc((100vw - 34px) / 5.3); }
+  .hero-intro { top: 80px; left: 16px; right: 16px; width: auto; font-size: clamp(19px, 5.4vw, 24px); line-height: 1.2; text-wrap: pretty; }
   .hero-side { position: static; width: auto; margin: 0 16px; }
   .hero-right { order: 1; margin-top: 24px; margin-bottom: 48px; }
   .hero-left { order: 2; margin-top: 28px; margin-bottom: 56px; }
@@ -160,7 +167,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-side, .pg-label, .side-name, .page-dots, .hero3d-stage canvas, .hero3d-fallback { transition: none; }
+  .hero-side, .pg-label, .hero-intro, .side-name, .page-dots, .hero3d-stage canvas, .hero3d-fallback { transition: none; }
 }
 
 /* "Let's work together" band before the contact section */

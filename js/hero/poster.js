@@ -1,8 +1,8 @@
-// Poster planes: the editorial grid and the "Forged in / Legend" headline are painted from the real
+// Poster planes: the editorial grid and the "Endless / Possibilities" headline are painted from the real
 // HTML layout into textures that live inside the 3D scene. That lets the dragon sit in front of some
 // letters and behind others, while CSS still decides where everything goes at every width. Each headline
-// line (.ph-row, with its orange block) is its own plane, so on scroll FORGED IN can slide off to the
-// left and LEGEND off to the right.
+// line (.ph-row, with its orange block) is its own plane, so on scroll ENDLESS can slide off to the
+// left and POSSIBILITIES off to the right.
 import * as THREE from 'three';
 
 const STRETCH = { '50%': 'ultra-condensed', '62.5%': 'extra-condensed', '75%': 'condensed', '87.5%': 'semi-condensed', '100%': 'normal' };
@@ -107,7 +107,7 @@ export function createPoster({ scene, host, root, dist, fov, bgZ = -4.5, fgZ = -
     ready = true; busy = false;
     slide(slid);
   }
-  // amount 0..1: rows slide out sideways, FORGED IN to the left and LEGEND to the right
+  // amount 0..1: rows slide out sideways, ENDLESS to the left and POSSIBILITIES to the right
   function slide(amount) {
     slid = amount;
     for (const row of rows) row.mesh.position.x = row.x + row.dir * row.away * amount * scaleFg;

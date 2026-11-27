@@ -34,9 +34,11 @@ The Drive files must stay shared as "Anyone with the link can view", or the play
 
 `image/photo/` holds the photography strip, as WebP (about 1200px on the long side).
 
-## 3D hero
+## 3D dragon hero (not on the page at the moment)
 
-The hero is a Three.js scene (loaded from jsDelivr, `three@0.160.0`, via the import map in `index.html`):
+Since the redesign the page opens with the photo fly-through instead (see below). The dragon hero and
+all its files are kept: `old/2026-11-27-before-redesign/index.html` is the last version that shows it.
+It is a Three.js scene (loaded from jsDelivr, `three@0.160.0`, through an import map):
 
 - `js/hero/hero.js`: entry. Shows a still of the dragon (`image/hero-fallback.webp`), then lazy-loads the scene once the page has loaded.
   To refresh that still after changing the dragon, open the page at 1440×900 with `?capture` and reduced motion on, and crop the `.dragon-anchor` square (720×720 from x 360, y 63).
@@ -45,13 +47,13 @@ The hero is a Three.js scene (loaded from jsDelivr, `three@0.160.0`, via the imp
 - `js/hero/dragon.js`: the dragon: body skin rebuilt along the spine every frame, dorsal plates (they fold down where they would reach into another coil), the head seated on the end of the neck (it turns with the neck, toward the cursor), and two front legs solved with two-bone IK, one each side at the top of the arch, both reaching toward the viewer with five forward-pointing fingers.
 - `js/hero/dragon-classic.js`: an older dragon (body coiled around the ring). Kept but not shown; open the page with `?dragon=classic` to see it.
 - `js/hero/particles.js`: the orange swirl clouds.
-- `js/hero/poster.js`: paints the grid lines, circles and the Forged in / Legend headline from the HTML into planes inside the 3D scene, so the dragon can sit in front of some letters and behind others. Each headline row (`.ph-row`, with its orange block) is its own plane, so the rows can slide apart. CSS still decides where everything goes; change the layout in `css/hero.css` and the scene follows.
+- `js/hero/poster.js`: paints the grid lines, circles and the Endless / Possibilities headline from the HTML into planes inside the 3D scene, so the dragon can sit in front of some letters and behind others. Each headline row (`.ph-row`, with its orange block) is its own plane, so the rows can slide apart. CSS still decides where everything goes; change the layout in `css/hero.css` and the scene follows.
 - The output pass in `scene.js` tone-maps the dragon, ring and glow, but not the poster planes (they write alpha 0), so the headline, blocks and background keep the exact brand colours.
 - `js/hero/overlay.js`: text entrance, the swap from the logo to the live scene, and the scroll progress through the hero (`--exit`, `--words`).
 - `css/hero.css`: hero layout, the scroll pin and the "Let's work together" band.
 
 On load the ring draws in, then the dragon rises from below the headline, circles the ring and settles into its pose (about 3.7 s).
-On scroll the dragon loops away to the left while Forged in slides off to the left and Legend off to the right; scrolling back brings them home.
+On scroll the dragon loops away to the left while ENDLESS slides off to the left and POSSIBILITIES off to the right; scrolling back brings them home.
 On screens wider than 900px the hero stays pinned while that plays (`--pin` on `.hero-pin`, 70svh of scrolling); on phones it plays as the hero scrolls away.
 
 Phones and touch devices get a lighter body mesh, fewer clouds and half-resolution bloom.
@@ -69,13 +71,28 @@ adding `?dragon=gold` or `?dragon=classic` to the address.
 ## Page sections and motion
 
 `css/site.css` and `js/site.js` hold the editorial layout and its motion (GSAP and ScrollTrigger from cdnjs):
-word-by-word statements, counters, the CUK*-ture Supremacy board (`#culture`), the services
-fly-through, the sideways work reel, and the orange eye-pattern band before the services. Sections alternate
-black (hero, culture, services, pricing, sign-off), cream (about, work) and orange (ticker, contact).
+the hero fly-through, word-by-word statements, counters, the CUK*-ture Supremacy board (`#culture`),
+the Work accordion, and the orange eye-pattern band before it. Sections alternate
+black (hero, culture, packages, sign-off), cream (about, work) and orange (ticker, contact).
 Without GSAP, or with reduced motion, the page falls back to a static layout.
 
-The services section is pinned while a camera flies forward through each service's three photos, which
-hang in depth around the service name (plain DOM cards with CSS perspective, built in `js/site.js` from
-the `.svc-shots` images). The Packages section has a star-field background, a pill switch between
-graduation, events and live streaming, and three tiers each with the middle one raised; prices read
+The hero (`#top`, black) is pinned while a camera flies forward through fifteen photos, in five waves of
+three, which hang in depth around "Anantaboga Creative Studio", the line about the studio and the
+Start a Project button (plain DOM cards with CSS perspective, built in `js/site.js` from the
+`.svc-shots` images). When the last wave has flown past, the page scrolls on.
+
+The Work section (`#work`, cream) is an accordion of the five kinds of film: thin strips with the name
+turned on its side; pointing at one (or tapping it on a phone, where they stack) opens it to show its
+photo, what it is and what it includes. "View all works" under it opens the index of all 27 films
+with filters and the player. The Packages section has a pill switch between
+Photo Production, Aftermovie and Live Streaming, and three tiers each with the middle one raised; prices read
 "On request" until real prices are filled in (`data-price` in `index.html`).
+
+Earlier versions are kept in `old/`:
+- `old/2026-11-27/`: before the Work and Services sections were merged; `work-section.html` there is
+  the old Work section (the sideways reel) on its own.
+- `old/2026-11-27-before-redesign/`: the dragon hero with "Endless / Possibilities", the Work
+  fly-through and everything else as it was just before this redesign.
+
+The stylesheets and scripts are linked with `?v=YYYYMMDD` in `index.html`; change that number when you
+update them so browsers fetch the new copies instead of using cached ones.

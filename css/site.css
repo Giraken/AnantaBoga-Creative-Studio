@@ -121,7 +121,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font); font-
   line-height: 1.02; letter-spacing: -.045em;
 }
 .statement.small { max-width: 24ch; font-size: clamp(30px, 3.8vw, 60px); }
-.statement .w { display: inline-block; opacity: .14; transition: opacity .2s linear; }
+.statement .w { display: inline-block; opacity: .14; transition: opacity 1.2s ease; }
 .statement .w.on { opacity: 1; }
 
 /* ---------- About (cream) ---------- */
@@ -241,6 +241,97 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font); font-
 .svc-progress { position: absolute; z-index: 4; left: var(--edge); right: var(--edge); bottom: 28px; height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
 .svc-progress span { display: block; height: 100%; width: 100%; background: var(--orange); transform-origin: left; transform: scaleX(var(--p, 0)); }
 
+/* The fly-through on cream: it is the Work section now. Same scene, the colours flipped. */
+.services.on-cream .svc-pin { background: radial-gradient(ellipse 55% 50% at 50% 54%, rgba(255,152,0,.14), transparent 72%), var(--cream); }
+.services.on-cream .svc-stage::before { border-color: rgba(12,12,12,.12); }
+.services.on-cream .svc-stage::after { border-color: rgba(12,12,12,.07); }
+.services.on-cream .svc-word { color: var(--black); background-image: linear-gradient(180deg, var(--black) 40%, rgba(12,12,12,.5)); }
+.services.on-cream .svc-kicker { color: var(--black); }
+.services.on-cream .svc-kicker::before { content: ""; display: inline-block; width: 8px; height: 8px; margin: 0 12px 1px 0; border-radius: 50%; background: var(--orange); }
+.services.on-cream .svc-panel::before { background: radial-gradient(closest-side, rgba(251,246,238,.9), rgba(251,246,238,.55) 55%, transparent); }
+.services.on-cream .chips li { background: rgba(251,246,238,.85); color: var(--black); }
+.services.on-cream .warp-card { background: #E9E1D2; box-shadow: 0 26px 50px rgba(12,12,12,.2), 0 0 0 1px rgba(12,12,12,.06); }
+.services.on-cream .svc-hint::after { background: linear-gradient(var(--black), transparent); }
+.services.on-cream .svc-pin .s-top { align-items: center; }
+.services.on-cream .svc-pin .s-top .pill { position: relative; z-index: 6; }
+/* Below the scene: the way into the full portfolio */
+.work-index { padding-top: clamp(30px, 4vw, 60px); }
+.work-index-cta { display: flex; justify-content: center; margin: 0; }
+.work-index-cta .pill { background: var(--black); border-color: var(--black); color: var(--cream); }
+.work-index-cta .pill:hover { background: var(--orange); border-color: var(--orange); color: var(--black); }
+.work-index .all-works { margin-top: 50px; padding-top: 40px; border-top: 1px solid var(--line); }
+.work-index .all-title { margin: 0 0 24px; font-size: clamp(28px, 3vw, 44px); font-weight: 800; letter-spacing: -.05em; }
+
+/* ---------- Hero: the fly-through, with the studio's name in the middle (black) ---------- */
+.fly-hero { display: block; position: relative; }
+.fly-hero .svc-pin { padding-top: 0; }
+.fly-hero .svc-stage::before, .fly-hero .svc-stage::after { display: none; } /* no rings in the hero */
+.fly-hero .svc-panel { inset: 80px var(--edge) 90px; }
+.fly-title { max-width: none; font-size: clamp(50px, 7.6vw, 160px); white-space: nowrap; }
+.fly-title span { display: block; }
+@media (max-width: 640px) { .fly-title { font-size: calc((100vw - 32px) / 7.9); } .fly-hero .svc-panel { inset: 80px 16px 90px; } }
+.fly-hero .svc-copy { display: flex; flex-direction: column; align-items: center; gap: 22px; max-width: 46ch; margin-top: 26px; }
+.fly-lede { margin: 0; font-size: clamp(18px, 1.55vw, 23px); line-height: 1.4; letter-spacing: -.02em; color: rgba(251,246,238,.82); }
+.fly-hero .svc-copy p.fly-lede { margin: 0; font-size: clamp(18px, 1.55vw, 23px); color: rgba(251,246,238,.82); }
+.fly-cta { min-height: 52px; padding: 14px 30px; font-size: 16px; }
+.static .fly-hero .svc-pin { padding-top: 110px; }
+/* On opening: "Anantaboga Creative Studio" rises in, then the line and the button together */
+.fly-title span, .fly-lede, .fly-cta { animation: fly-in 1.1s cubic-bezier(.2,.7,.2,1) both; }
+.fly-title span { animation-delay: .25s; }
+.fly-lede, .fly-cta { animation-delay: 1s; }
+@keyframes fly-in { from { opacity: 0; transform: translateY(46px); filter: blur(10px); } }
+@media (prefers-reduced-motion: reduce) { .fly-title span, .fly-lede, .fly-cta { animation: none; } }
+.static .fly-hero .svc-copy { align-items: flex-start; }
+
+/* ---------- Work: an accordion of the five kinds of film (white) ----------
+   Thin strips with the name turned on its side; the open one widens to show its photo, what it is
+   and what it includes. Pointing at a strip opens it (click or tap on touch screens). */
+.acc { display: flex; height: clamp(480px, 70vh, 740px); margin-top: clamp(40px, 5vw, 70px); }
+.acc-item {
+  position: relative; display: flex; flex: 0 0 76px; min-width: 0; overflow: hidden;
+  border-left: 1px solid var(--line); transition: flex-grow .85s cubic-bezier(.65,0,.2,1), flex-basis .85s cubic-bezier(.65,0,.2,1);
+}
+.acc-item:last-child { border-right: 1px solid var(--line); }
+.acc-item.is-open { flex: 1 1 0; }
+.acc-tab {
+  flex: 0 0 76px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 16px 0 18px; border: 0; background: none; color: var(--mute); font: inherit; cursor: pointer; transition: color .3s;
+}
+.acc-tab:hover { color: var(--ink); }
+.acc-tab:focus-visible { outline: 2px solid var(--orange); outline-offset: -4px; }
+.acc-no { font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.acc-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 16px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.acc-item.is-open .acc-tab { color: var(--ink); }
+.acc-item.is-open .acc-no { color: var(--orange); font-weight: 700; }
+.acc-panel { position: relative; flex: 1 1 auto; min-width: 0; margin-right: 16px; overflow: hidden; border-radius: 20px; background: #E9E1D2; opacity: 0; transition: opacity .45s; }
+.acc-item.is-open .acc-panel { opacity: 1; transition: opacity .6s .2s; }
+.acc-panel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); transition: transform 1.6s cubic-bezier(.2,.7,.2,1); }
+.acc-item.is-open .acc-panel img { transform: scale(1); }
+.acc-copy {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: clamp(22px, 2.6vw, 40px); color: var(--cream);
+  background: linear-gradient(transparent, rgba(12,12,12,.55) 35%, rgba(12,12,12,.85));
+  opacity: 0; transform: translateY(24px); transition: opacity .4s, transform .4s;
+}
+.acc-item.is-open .acc-copy { opacity: 1; transform: none; transition: opacity .7s .45s, transform .9s .45s cubic-bezier(.2,.7,.2,1); }
+.acc-copy h3 { margin: 0 0 10px; font-size: clamp(32px, 3.6vw, 60px); font-weight: 800; line-height: .95; letter-spacing: -.055em; }
+.acc-copy p { max-width: 48ch; margin: 0 0 18px; font-size: clamp(15px, 1.2vw, 18px); line-height: 1.5; color: rgba(251,246,238,.84); }
+.acc-copy .chips li { background: rgba(12,12,12,.45); border-color: rgba(251,246,238,.28); color: var(--cream); }
+.work-acc .work-index-cta { margin-top: clamp(36px, 4vw, 56px); }
+.work-acc .all-works { margin-top: 50px; padding-top: 40px; border-top: 1px solid var(--line); }
+@media (max-width: 760px) {
+  .acc { flex-direction: column; height: auto; }
+  .acc-item { flex: none; flex-direction: column; border-left: 0; border-top: 1px solid var(--line); }
+  .acc-item:last-child { border-right: 0; border-bottom: 1px solid var(--line); }
+  .acc-item.is-open { flex: none; }
+  .acc-tab { flex: none; flex-direction: row; justify-content: flex-start; gap: 14px; padding: 18px 0; }
+  .acc-label { writing-mode: horizontal-tb; text-orientation: mixed; text-transform: none; line-height: 1.1; transform: none; font-size: 22px; font-weight: 800; letter-spacing: -.035em; }
+  .acc-panel { flex: none; height: 0; margin: 0; transition: height .6s cubic-bezier(.65,0,.2,1), opacity .4s; }
+  .acc-item.is-open .acc-panel { height: min(118vw, 68svh); margin-bottom: 18px; transition: height .7s cubic-bezier(.65,0,.2,1), opacity .5s .15s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc-item, .acc-panel, .acc-panel img, .acc-copy { transition: none !important; }
+}
+
 /* ---------- Work: horizontal reel (cream) ---------- */
 .work { padding-bottom: clamp(70px, 9vw, 130px); }
 .reel-pin { position: relative; z-index: 1; overflow: hidden; margin-top: clamp(50px, 6vw, 90px); }
@@ -267,12 +358,8 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font); font-
 .is-slate, .monitor-frame.is-slate { background: var(--black) url("../image/eye.svg") no-repeat center / 46% auto; --ink-eye: var(--cream); }
 .monitor-frame.is-slate .monitor-slate { color: var(--cream); font-weight: 800; letter-spacing: -.04em; background: rgba(12,12,12,.72); }
 
-/* ---------- Packages (black): a quiet star field, a pill switch and three cards, the middle one raised ---------- */
+/* ---------- Packages (black, like the other dark sections): a pill switch and three cards, the middle one raised ---------- */
 .pricing { position: relative; isolation: isolate; overflow: hidden; }
-.pkg-stars, .pkg-stars::after { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
-.pkg-stars { background-image: radial-gradient(1.5px 1.5px at 94.8% 39.5%, rgba(251,246,238,0.29), transparent), radial-gradient(1px 1px at 36.6% 5.8%, rgba(251,246,238,0.41), transparent), radial-gradient(1px 1px at 8.6% 41.8%, rgba(251,246,238,0.34), transparent), radial-gradient(2px 2px at 5.9% 56.5%, rgba(251,246,238,0.54), transparent), radial-gradient(1px 1px at 57.7% 39.7%, rgba(251,246,238,0.54), transparent), radial-gradient(1px 1px at 55.7% 13.3%, rgba(251,246,238,0.39), transparent), radial-gradient(1px 1px at 57.1% 56.0%, rgba(251,246,238,0.46), transparent), radial-gradient(1px 1px at 58.2% 63.9%, rgba(251,246,238,0.38), transparent), radial-gradient(1px 1px at 56.4% 61.9%, rgba(251,246,238,0.41), transparent), radial-gradient(2px 2px at 77.7% 46.6%, rgba(251,246,238,0.53), transparent), radial-gradient(1.5px 1.5px at 30.0% 79.4%, rgba(251,246,238,0.47), transparent), radial-gradient(1px 1px at 8.2% 30.0%, rgba(251,246,238,0.41), transparent), radial-gradient(1.5px 1.5px at 72.9% 28.8%, rgba(251,246,238,0.54), transparent), radial-gradient(1px 1px at 51.2% 16.5%, rgba(251,246,238,0.37), transparent), radial-gradient(2px 2px at 42.2% 96.2%, rgba(251,246,238,0.30), transparent), radial-gradient(1.5px 1.5px at 34.0% 35.0%, rgba(251,246,238,0.41), transparent), radial-gradient(2px 2px at 6.9% 9.4%, rgba(251,246,238,0.35), transparent), radial-gradient(1px 1px at 6.1% 70.1%, rgba(251,246,238,0.45), transparent), radial-gradient(2px 2px at 28.5% 38.6%, rgba(251,246,238,0.46), transparent), radial-gradient(1px 1px at 94.1% 35.5%, rgba(251,246,238,0.44), transparent), radial-gradient(2px 2px at 5.9% 76.8%, rgba(251,246,238,0.31), transparent), radial-gradient(1px 1px at 39.8% 91.7%, rgba(251,246,238,0.41), transparent), radial-gradient(1px 1px at 44.9% 54.9%, rgba(251,246,238,0.52), transparent), radial-gradient(2px 2px at 86.4% 27.8%, rgba(251,246,238,0.39), transparent), radial-gradient(1.5px 1.5px at 68.3% 38.0%, rgba(251,246,238,0.34), transparent), radial-gradient(1px 1px at 17.6% 23.2%, rgba(251,246,238,0.34), transparent), radial-gradient(2px 2px at 83.1% 18.2%, rgba(251,246,238,0.35), transparent), radial-gradient(1px 1px at 41.9% 36.9%, rgba(251,246,238,0.43), transparent), radial-gradient(1px 1px at 69.0% 51.5%, rgba(251,246,238,0.44), transparent), radial-gradient(1px 1px at 45.7% 87.1%, rgba(251,246,238,0.54), transparent), radial-gradient(2px 2px at 39.8% 39.4%, rgba(251,246,238,0.41), transparent), radial-gradient(2px 2px at 6.2% 6.7%, rgba(251,246,238,0.33), transparent), radial-gradient(1px 1px at 11.0% 60.1%, rgba(251,246,238,0.30), transparent), radial-gradient(1px 1px at 53.7% 94.9%, rgba(251,246,238,0.44), transparent), radial-gradient(1px 1px at 87.4% 61.4%, rgba(251,246,238,0.32), transparent), radial-gradient(1.5px 1.5px at 95.5% 60.2%, rgba(251,246,238,0.41), transparent), radial-gradient(1px 1px at 84.9% 99.3%, rgba(251,246,238,0.40), transparent), radial-gradient(2px 2px at 31.2% 14.4%, rgba(251,246,238,0.48), transparent), radial-gradient(1.5px 1.5px at 47.9% 69.2%, rgba(251,246,238,0.42), transparent), radial-gradient(1px 1px at 95.1% 52.8%, rgba(251,246,238,0.32), transparent), radial-gradient(1px 1px at 75.8% 29.8%, rgba(251,246,238,0.45), transparent), radial-gradient(1px 1px at 69.6% 26.1%, rgba(251,246,238,0.38), transparent), radial-gradient(1px 1px at 35.6% 22.3%, rgba(251,246,238,0.42), transparent), radial-gradient(1.5px 1.5px at 63.6% 61.3%, rgba(251,246,238,0.49), transparent), radial-gradient(1px 1px at 80.6% 81.8%, rgba(251,246,238,0.48), transparent), radial-gradient(1px 1px at 20.0% 49.3%, rgba(251,246,238,0.48), transparent); animation: twinkle 5s ease-in-out infinite alternate; }
-.pkg-stars::after { content: ""; background-image: radial-gradient(1px 1px at 79.0% 47.2%, rgba(251,246,238,0.48), transparent), radial-gradient(1.5px 1.5px at 44.7% 93.7%, rgba(251,246,238,0.80), transparent), radial-gradient(1.5px 1.5px at 8.1% 10.2%, rgba(251,246,238,0.59), transparent), radial-gradient(1.5px 1.5px at 20.4% 62.4%, rgba(251,246,238,0.76), transparent), radial-gradient(1px 1px at 47.9% 65.3%, rgba(251,246,238,0.72), transparent), radial-gradient(1px 1px at 83.5% 12.0%, rgba(251,246,238,0.56), transparent), radial-gradient(1px 1px at 47.8% 17.9%, rgba(251,246,238,0.72), transparent), radial-gradient(1.5px 1.5px at 8.7% 94.6%, rgba(251,246,238,0.69), transparent), radial-gradient(2px 2px at 40.1% 94.7%, rgba(251,246,238,0.69), transparent), radial-gradient(1px 1px at 99.3% 2.8%, rgba(251,246,238,0.64), transparent), radial-gradient(2px 2px at 80.7% 14.6%, rgba(251,246,238,0.73), transparent), radial-gradient(2px 2px at 65.7% 35.0%, rgba(251,246,238,0.62), transparent), radial-gradient(1px 1px at 2.1% 79.9%, rgba(251,246,238,0.69), transparent), radial-gradient(1px 1px at 52.7% 93.4%, rgba(251,246,238,0.57), transparent), radial-gradient(1px 1px at 82.6% 21.1%, rgba(251,246,238,0.50), transparent), radial-gradient(1.5px 1.5px at 50.1% 76.4%, rgba(251,246,238,0.53), transparent), radial-gradient(2px 2px at 83.4% 6.1%, rgba(251,246,238,0.70), transparent), radial-gradient(2px 2px at 66.2% 81.5%, rgba(251,246,238,0.61), transparent), radial-gradient(1px 1px at 53.2% 52.4%, rgba(251,246,238,0.41), transparent), radial-gradient(2px 2px at 77.7% 60.9%, rgba(251,246,238,0.71), transparent), radial-gradient(1px 1px at 17.2% 47.3%, rgba(251,246,238,0.69), transparent), radial-gradient(1px 1px at 32.6% 51.8%, rgba(251,246,238,0.62), transparent), radial-gradient(1px 1px at 88.3% 5.7%, rgba(251,246,238,0.48), transparent), radial-gradient(1px 1px at 77.2% 50.8%, rgba(251,246,238,0.62), transparent), radial-gradient(1px 1px at 44.3% 61.3%, rgba(251,246,238,0.60), transparent), radial-gradient(1px 1px at 69.3% 45.2%, rgba(251,246,238,0.61), transparent), radial-gradient(2px 2px at 50.8% 24.8%, rgba(251,246,238,0.61), transparent), radial-gradient(1.5px 1.5px at 92.3% 89.3%, rgba(251,246,238,0.48), transparent), radial-gradient(2px 2px at 13.7% 12.2%, rgba(251,246,238,0.58), transparent), radial-gradient(1px 1px at 67.1% 42.8%, rgba(251,246,238,0.49), transparent), radial-gradient(1.5px 1.5px at 78.4% 89.7%, rgba(251,246,238,0.46), transparent), radial-gradient(1.5px 1.5px at 14.3% 88.3%, rgba(251,246,238,0.79), transparent), radial-gradient(1px 1px at 74.7% 9.4%, rgba(251,246,238,0.75), transparent), radial-gradient(1px 1px at 99.0% 83.2%, rgba(251,246,238,0.46), transparent); animation: twinkle 3.2s ease-in-out infinite alternate-reverse; }
-@keyframes twinkle { from { opacity: .35; } to { opacity: 1; } }
 .pkg-intro { max-width: 760px; margin: clamp(36px, 5vw, 70px) auto 0; text-align: center; }
 .pkg-heading { margin: 0; font-size: clamp(38px, 5vw, 80px); font-weight: 800; line-height: .95; letter-spacing: -.06em; }
 .pkg-sub { margin: 18px auto 0; max-width: 46ch; font-size: clamp(16px, 1.3vw, 19px); color: var(--mute); }
@@ -344,9 +431,9 @@ html:not(.static) .pricing:not(.is-in) .plan, html:not(.static) .pricing:not(.is
 .contact .map { margin-top: 50px; aspect-ratio: 21 / 7; border-radius: 26px; overflow: hidden; filter: grayscale(1) contrast(1.05); border: 0; }
 .contact .map:hover { filter: none; }
 .contact .map iframe { width: 100%; height: 100%; border: 0; }
-.sign-off { position: relative; z-index: 1; margin-top: clamp(80px, 10vw, 140px); padding-top: clamp(70px, 8vw, 110px); text-align: center; background: var(--black); color: var(--cream); }
+.sign-off { position: relative; z-index: 1; margin-top: clamp(80px, 10vw, 140px); padding-top: 0; text-align: center; background: var(--black); color: var(--cream); }
 /* The eye badge (as on the studio T-shirt) closes the page */
-.seal { display: grid; place-items: center; width: clamp(110px, 11vw, 160px); aspect-ratio: 1; margin: 0 auto clamp(26px, 3vw, 40px); border-radius: 50%; background: var(--cream); --ink-eye: var(--black); }
+.seal { display: grid; place-items: center; width: clamp(110px, 11vw, 160px); aspect-ratio: 1; margin: 0 auto clamp(60px, 7vw, 100px); border-radius: 50%; background: var(--cream); --ink-eye: var(--black); }
 .seal-eye { width: 72%; height: auto; }
 .wordmark { margin: 0; font-size: 17.6vw; font-weight: 800; line-height: .82; letter-spacing: -.065em; color: var(--orange); white-space: nowrap; user-select: none; }
 .wordmark-sub { margin: 0 0 clamp(40px, 5vw, 70px); font-size: 6.4vw; font-weight: 300; line-height: 1; letter-spacing: -.05em; color: var(--orange); user-select: none; }
@@ -402,12 +489,12 @@ html:not(.static) .pricing:not(.is-in) .plan, html:not(.static) .pricing:not(.is
   .ticker-track, .eye-band { animation: none; }
   .statement .w { opacity: 1; }
   .reveal { opacity: 1; transform: none; }
-  .pkg-stars, .pkg-stars::after, .svc-hint::after { animation: none; }
+  .svc-hint::after { animation: none; }
   .pkg-group.is-entering .plan, .pkg-group.is-entering .pkg-lede { animation: none; }
 }
 
 /* ---------- Static fallback (no GSAP or reduced motion): services stack, reel swipes ---------- */
-.static .svc-pin { height: auto; min-height: 0; padding-block: 96px 40px; overflow: visible; background: var(--black); }
+.static .svc-pin { height: auto; min-height: 0; padding-block: 96px 40px; overflow: visible; background: var(--bg); }
 .static .svc-stage { position: static; display: grid; gap: 70px; padding: 40px var(--edge) 0; }
 .static .svc-stage::before, .static .svc-stage::after, .static .svc-hint, .static .svc-progress, .static .svc-pin .s-top .tag-muted { display: none; }
 .static .svc-panel { position: relative; inset: auto; display: block; text-align: left; opacity: 1; visibility: visible; filter: none; transform: none; }
