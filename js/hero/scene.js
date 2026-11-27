@@ -5,7 +5,6 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { createDragon } from './dragon.js';
@@ -14,7 +13,7 @@ import { createDragon as createClassicDragon } from './dragon-classic.js'; // ea
 import { createParticles } from './particles.js';
 import { createPoster } from './poster.js';
 
-const ORANGE = new THREE.Color('#F7991F');
+const ORANGE = new THREE.Color('#FF9800'); // Orange Peel
 const BLOOM = 1; // layer for the glowing parts: ring, eyes, clouds
 const DIST = 12, FOV = 30;
 const NEED = 8.2; // world size of the whole dragon and ring, fitted to the .dragon-anchor box
@@ -37,7 +36,7 @@ function ring(radius, thickness, glow, segs = 320) {
 export function startScene(host, { lite = false, still = false, root = host.parentElement, exit = () => 0, variant = 'gold' } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: !lite, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2));
-  renderer.setClearColor(0x000000, 1);
+  renderer.setClearColor(0x0c0c0c, 1); // Black Wash
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
   host.appendChild(renderer.domElement);
@@ -100,7 +99,22 @@ export function startScene(host, { lite = false, still = false, root = host.pare
   }), 'baseTexture');
   mix.needsSwap = true;
   composer.addPass(mix);
-  composer.addPass(new OutputPass());
+  // Output: film tone mapping for the dragon, ring and glow, but the poster planes (marked with
+  // alpha 0, see poster.js) keep their exact brand colours: Orange Peel, Floral White, Black Wash.
+  composer.addPass(new ShaderPass(new THREE.RawShaderMaterial({
+    uniforms: { tDiffuse: { value: null }, toneMappingExposure: { value: renderer.toneMappingExposure } },
+    vertexShader: `precision highp float; uniform mat4 modelViewMatrix; uniform mat4 projectionMatrix;
+      attribute vec3 position; attribute vec2 uv; varying vec2 vUv;
+      void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `precision highp float; uniform sampler2D tDiffuse; varying vec2 vUv;
+      #include <tonemapping_pars_fragment>
+      #include <colorspace_pars_fragment>
+      void main(){
+        vec4 c = texture2D(tDiffuse, vUv);
+        vec3 col = mix(c.rgb, ACESFilmicToneMapping(c.rgb), clamp(c.a, 0.0, 1.0));
+        gl_FragColor = sRGBTransferOETF(vec4(col, 1.0));
+      }`,
+  })));
 
   const blackout = new THREE.MeshBasicMaterial({ color: 0x000000 });
   const blackoutCut = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, alphaTest: 0.5 });

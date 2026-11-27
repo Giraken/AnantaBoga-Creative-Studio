@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { REST, createTrack, createSolver, bodyRadius, bodyFrames, headBasis, HEAD_TILT, HEAD_SPHERES, HEAD_DOWN } from './spine.js';
 
-const ORANGE = new THREE.Color('#F7991F');
+const ORANGE = new THREE.Color('#FF9800');
 const GRAY = new THREE.Color('#7A7A7A');
 const LIGHT_GRAY = new THREE.Color('#A0A0A0');
 const BONE = new THREE.Color('#E8E2D6');

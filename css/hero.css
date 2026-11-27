@@ -2,13 +2,13 @@
    boxes (.dragon-anchor, .pg-*, .poster-head) and paints the grid and headline into the scene
    so the dragon can sit in front of some letters and behind others. */
 .hero3d {
-  --orange: #F7991F;
+  --orange: #FF9800;
   --dragon-gray: #7A7A7A;
   --light-gray: #A0A0A0;
-  --black: #000000;
-  --white: #FFFFFF;
-  --grid: #1F1F1F;
-  --ring-line: #1A1A1A;
+  --black: #0C0C0C;
+  --white: #FBF6EE;
+  --grid: #1E1E1E;
+  --ring-line: #1B1B1B;
   --edge: clamp(20px, 3.9vw, 56px);
   position: relative; height: 100svh; min-height: 680px; max-height: 1100px;
   background: var(--black); overflow: hidden; isolation: isolate;
@@ -50,21 +50,22 @@
 .hero3d-fallback {
   position: absolute; z-index: 1; left: 50%; top: 47%; width: min(calc(var(--hero-h, 100svh) * .8), 54vw);
   height: auto; aspect-ratio: 1; transform: translate(-50%, -50%); transition: opacity .9s ease;
+  /* soften the square edge of the still into the page black */
+  -webkit-mask-image: radial-gradient(#000 62%, transparent 100%); mask-image: radial-gradient(#000 62%, transparent 100%);
 }
 .hero3d.has-scene .hero3d-fallback { opacity: 0; }
 /* Without WebGL the still spins away to the left on scroll, like the dragon does */
 .hero3d.no-scene .hero3d-fallback { transform: translate(calc(-50% - var(--exit, 0) * 75vw), -50%) rotate(calc(var(--exit, 0) * -160deg)); }
 
-/* Headline: FORGED IN / LEGEND, one row each, with an orange block behind each row. Where the
+/* Headline: Forged in / Legend, set in Plus Jakarta Sans Extra Bold like the brand boards, one row each, with an orange block behind each row. Where the
    letters cross a block they turn black: each row's text is clipped from a white fill with a black
    rectangle that sits exactly over its block (same percentages of the same box). On scroll the
    rows slide apart, FORGED IN off to the left and LEGEND off to the right. */
 .poster-head {
   position: absolute; z-index: 2; left: var(--edge); right: var(--edge); bottom: 76px;
   margin: 0; pointer-events: none;
-  font-family: "Archivo", system-ui, sans-serif; font-weight: 800; font-stretch: 62.5%;
-  font-variation-settings: normal; /* let font-stretch drive the width axis (the canvas copy uses it too) */
-  font-size: clamp(84px, min(16.5vw, 27vh), 300px); line-height: .84; letter-spacing: -.012em; text-transform: uppercase;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif; font-weight: 800;
+  font-size: clamp(76px, min(14.6vw, 25vh), 270px); line-height: .9; letter-spacing: -.05em;
 }
 .ph-row { position: relative; display: block; }
 .ph-r1 { transform: translateX(calc(var(--words, 0) * (-100% - var(--edge)))); }
@@ -86,14 +87,14 @@
 .hero3d.has-scene .pg, .hero3d.has-scene .poster-block, .hero3d.has-scene .ph-text { opacity: 0; }
 
 /* Small details in the grid cells */
-.pg-label { position: absolute; z-index: 3; margin: 0; font-size: 13px; color: var(--dragon-gray); letter-spacing: .04em; }
+.pg-label { position: absolute; z-index: 3; margin: 0; font-size: 14px; font-weight: 600; color: var(--dragon-gray); letter-spacing: -.01em; }
 .pg-label.lb1 { top: 90px; left: calc(25% + 16px); }
 .pg-label.lb2 { top: 90px; left: calc(75% + 16px); }
 .pg-label.lb3 { bottom: 22px; left: calc(50% + 16px); }
 .side-name {
   position: absolute; z-index: 3; left: 14px; top: 50%; margin: 0;
   writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg);
-  font-size: 13px; font-weight: 700; letter-spacing: .55em; text-transform: uppercase; color: var(--dragon-gray);
+  font-size: 14px; font-weight: 800; letter-spacing: .3em; color: var(--dragon-gray);
 }
 .page-dots { position: absolute; z-index: 3; left: var(--edge); bottom: 20px; display: flex; gap: 18px; }
 .page-dots a { font-size: 13px; font-weight: 700; color: var(--dragon-gray); text-decoration: none; font-variant-numeric: tabular-nums; }
@@ -120,14 +121,14 @@
 .hero-services li { border-bottom: 1px solid var(--grid); }
 .hero-services a {
   display: flex; align-items: baseline; gap: 14px; padding: 12px 0; text-decoration: none;
-  font-size: clamp(18px, 1.6vw, 22px); font-weight: 500; color: var(--dragon-gray); transition: color .2s;
+  font-size: clamp(18px, 1.6vw, 22px); font-weight: 600; letter-spacing: -.035em; color: var(--dragon-gray); transition: color .2s;
 }
 .hero-services a span { font-size: 12px; font-weight: 700; color: var(--dragon-gray); font-variant-numeric: tabular-nums; }
 .hero-services li.is-active a { color: var(--white); font-weight: 800; }
 .hero-services li.is-active a span { color: var(--orange); }
 .hero-services a:hover { color: var(--white); }
 .hero-stat { margin: 18px 0 0; color: var(--light-gray); font-size: 14px; }
-.hero-stat b { display: block; color: var(--white); font-size: 40px; font-weight: 800; font-stretch: 62.5%; font-variation-settings: normal; line-height: 1; }
+.hero-stat b { display: block; color: var(--orange); font-size: 46px; font-weight: 800; letter-spacing: -.06em; line-height: 1; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .hero-actions .btn { min-height: 44px; padding: 10px 18px; font-size: 15px; }
 
@@ -150,7 +151,7 @@
   .dragon-anchor, .hero3d-fallback { top: 44%; width: min(92vw, 62svh); }
   .pg-circle { top: 44%; }
   .pg-circle.c1 { width: 58vw; } .pg-circle.c2 { width: 88vw; }
-  .poster-head { left: 14px; right: 14px; bottom: 18px; font-size: 24.5vw; }
+  .poster-head { left: 14px; right: 14px; bottom: 18px; font-size: 21.5vw; }
   .hero-side { position: static; width: auto; margin: 0 16px; }
   .hero-right { order: 1; margin-top: 24px; }
   .hero-left { order: 2; margin-top: 28px; margin-bottom: 56px; }

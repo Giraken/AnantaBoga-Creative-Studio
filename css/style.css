@@ -1,14 +1,13 @@
-/* Anantaboga Creative Studio
-   Palette taken from the logo: studio orange, two greys, black and white. */
+/* Anantaboga Creative Studio: base layer. Brand colours and type live in site.css (brand guideline). */
 :root {
-  --orange: #F7991F;
+  --orange: #FF9800;
   --grey: #7A7A7A;
   --grey-light: #A0A0A0;
-  --black: #000000;
-  --white: #FFFFFF;
+  --black: #0C0C0C;
+  --white: #FBF6EE;
   --line: rgba(255, 255, 255, .16);
   --line-ink: rgba(0, 0, 0, .14);
-  --font: "Archivo", system-ui, sans-serif;
+  --font: "Plus Jakarta Sans", system-ui, sans-serif;
   --gutter: clamp(16px, 4vw, 56px);
   --max: 1320px;
 }

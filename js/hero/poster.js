@@ -1,4 +1,4 @@
-// Poster planes: the editorial grid and the "FORGED IN / LEGEND" headline are painted from the real
+// Poster planes: the editorial grid and the "Forged in / Legend" headline are painted from the real
 // HTML layout into textures that live inside the 3D scene. That lets the dragon sit in front of some
 // letters and behind others, while CSS still decides where everything goes at every width. Each headline
 // line (.ph-row, with its orange block) is its own plane, so on scroll FORGED IN can slide off to the
@@ -10,6 +10,8 @@ const STRETCH = { '50%': 'ultra-condensed', '62.5%': 'extra-condensed', '75%': '
 export function createPoster({ scene, host, root, dist, fov, bgZ = -4.5, fgZ = -0.12 }) {
   const mk = (z, opts) => {
     const mat = new THREE.MeshBasicMaterial({ toneMapped: false, ...opts });
+    // Alpha 0 tells the output pass to skip tone mapping here, so the brand colours stay exact
+    mat.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n\tgl_FragColor.a = 0.0;'); };
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
     mesh.position.z = z; mesh.visible = false; scene.add(mesh);
     return mesh;
@@ -18,7 +20,7 @@ export function createPoster({ scene, host, root, dist, fov, bgZ = -4.5, fgZ = -
   bg.renderOrder = -10;
   // One plane per headline row: x = where CSS put it, dir = which way it leaves (-1 left, +1 right)
   const rowEls = [...root.querySelectorAll('.ph-row')];
-  const rows = rowEls.map((el, k) => ({ el, mesh: mk(fgZ, { transparent: true, alphaTest: 0.5 }), x: 0, away: 0, dir: k === 0 ? -1 : 1 }));
+  const rows = rowEls.map((el, k) => ({ el, mesh: mk(fgZ, { alphaTest: 0.5 }), x: 0, away: 0, dir: k === 0 ? -1 : 1 }));
 
   const canvasFor = (w, h, dpr) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * dpr)); c.height = Math.max(1, Math.round(h * dpr)); return c; };
   const rel = (el, box) => { const r = el.getBoundingClientRect(); return { x: r.left - box.left, y: r.top - box.top, w: r.width, h: r.height }; };
@@ -26,7 +28,7 @@ export function createPoster({ scene, host, root, dist, fov, bgZ = -4.5, fgZ = -
   function paintBg(w, h, dpr, box) {
     const c = canvasFor(w, h, dpr), g = c.getContext('2d');
     g.scale(dpr, dpr);
-    g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
+    g.fillStyle = getComputedStyle(root).getPropertyValue('--black').trim() || '#0C0C0C'; g.fillRect(0, 0, w, h);
     for (const el of root.querySelectorAll('.pg-circle')) {
       const r = rel(el, box), cs = getComputedStyle(el);
       if (r.w < 2) continue; // hidden at this width
@@ -68,8 +70,8 @@ export function createPoster({ scene, host, root, dist, fov, bgZ = -4.5, fgZ = -
       g.fillText(text, 0, lr.y + (lr.h - (asc + desc)) / 2 + asc);
       g.restore();
     };
-    drawLine('#ffffff');
-    if (block) { g.save(); g.beginPath(); g.rect(block.x, block.y, block.w, block.h); g.clip(); drawLine('#000000'); g.restore(); }
+    drawLine(getComputedStyle(root).getPropertyValue('--white').trim() || '#FBF6EE');
+    if (block) { g.save(); g.beginPath(); g.rect(block.x, block.y, block.w, block.h); g.clip(); drawLine(getComputedStyle(root).getPropertyValue('--black').trim() || '#0C0C0C'); g.restore(); }
     // How far the row travels to clear the frame: its own width plus the page margin (as in the CSS)
     const rowBox = rel(row, box);
     return { canvas: c, rect: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, away: rowBox.w + Math.max(0, rowBox.x) };

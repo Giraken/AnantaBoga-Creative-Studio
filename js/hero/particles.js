@@ -48,7 +48,7 @@ export function createParticles({ clusters = 7 } = {}) {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 }, uFade: { value: 0 }, uMap: { value: swirlTexture() },
-      uScale: { value: 1 }, uColor: { value: new THREE.Color('#F7991F').multiplyScalar(1.2) },
+      uScale: { value: 1 }, uColor: { value: new THREE.Color('#FF9800').multiplyScalar(1.2) },
     },
     vertexShader: /* glsl */`
       attribute float aSeed; attribute float aSize;

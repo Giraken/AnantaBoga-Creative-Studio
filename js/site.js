@@ -1,4 +1,4 @@
-// Site motion: word-by-word statements, counters, the dragon curve drawn with the scroll, the pinned
+// Site motion: word-by-word statements, counters, the eye-pattern bands, the CUK*-ture title, the pinned
 // services scene, and the horizontal work reel. Without GSAP, or with reduced motion, the page falls
 // back to a plain static layout (html.static).
 (() => {
@@ -64,7 +64,7 @@
   });
 
   // Gentle reveal for images and blocks
-  gsap.utils.toArray('.about-shot, .about-copy, .plan, .contact-cols > div, .clients, .stats').forEach(el => {
+  gsap.utils.toArray('.about-shot, .about-copy, .plan, .contact-cols > div, .clients, .stats, .mf-top > div, .cuk li').forEach(el => {
     el.classList.add('reveal');
     ScrollTrigger.create({ trigger: el, start: 'top 88%', once: true, onEnter: () => el.classList.add('is-shown') });
   });
@@ -73,14 +73,16 @@
     gsap.fromTo(img, { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: true } });
   });
 
-  // The dragon curve draws itself as it passes through the screen
-  document.querySelectorAll('.curve-break').forEach(box => {
-    box.querySelectorAll('path').forEach((path, k) => {
-      const len = path.getTotalLength();
-      gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
-      gsap.to(path, { strokeDashoffset: 0, ease: 'none', scrollTrigger: { trigger: box, start: 'top 95%', end: 'bottom 25%', scrub: 0.6 + k * 0.4 } });
-    });
+  // The eye pattern bands drift a little with the scroll, on top of their slow CSS drift
+  gsap.utils.toArray('.eye-band').forEach(band => {
+    gsap.fromTo(band, { backgroundPositionY: '0px' }, { backgroundPositionY: '-140px', ease: 'none', scrollTrigger: { trigger: band, start: 'top bottom', end: 'bottom top', scrub: true } });
   });
+  // The CUK*-ture Supremacy lines slide in from opposite sides
+  const mf = document.querySelector('.mf-title');
+  if (mf) {
+    gsap.fromTo(mf.querySelector('.mf-l1'), { xPercent: -18, opacity: 0 }, { xPercent: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger: mf, start: 'top 95%', end: 'center 60%', scrub: 0.6 } });
+    gsap.fromTo(mf.querySelector('.mf-l2'), { xPercent: 18, opacity: 0 }, { xPercent: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger: mf, start: 'top 95%', end: 'center 60%', scrub: 0.6 } });
+  }
 
   // Services: pinned; each stretch of scrolling brings in the next service
   const pin = document.querySelector('.svc-pin');
