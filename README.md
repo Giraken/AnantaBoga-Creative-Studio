@@ -69,8 +69,13 @@ adding `?dragon=gold` or `?dragon=classic` to the address.
 ## Page sections and motion
 
 `css/site.css` and `js/site.js` hold the editorial layout and its motion (GSAP and ScrollTrigger from cdnjs):
-word-by-word statements, counters, the CUK*-ture Supremacy board (`#culture`), the pinned services
-scene, the sideways work reel, and the orange eye-pattern bands between sections. Sections alternate
+word-by-word statements, counters, the CUK*-ture Supremacy board (`#culture`), the services
+fly-through, the sideways work reel, and the orange eye-pattern band before the services. Sections alternate
 black (hero, culture, services, pricing, sign-off), cream (about, work) and orange (ticker, contact).
-Without GSAP, or with reduced motion, the page falls back to a static layout. Prices in the Pricing section read "On request" until real prices are filled in
-(`data-price` in `index.html`).
+Without GSAP, or with reduced motion, the page falls back to a static layout.
+
+The services section is pinned while a camera flies forward through each service's three photos, which
+hang in depth around the service name (plain DOM cards with CSS perspective, built in `js/site.js` from
+the `.svc-shots` images). The Packages section has a star-field background, a pill switch between
+graduation, events and live streaming, and three tiers each with the middle one raised; prices read
+"On request" until real prices are filled in (`data-price` in `index.html`).

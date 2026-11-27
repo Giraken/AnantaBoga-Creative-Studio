@@ -17,6 +17,14 @@
   <link rel="stylesheet" href="css/hero.css">
   <link rel="stylesheet" href="css/site.css">
   <link rel="preload" as="image" href="image/hero-fallback.webp">
+  <script>
+    // A refresh always starts at the top of a clean URL (no #section), so the hero and the pinned
+    // sections are measured from the top and the dragon is always there
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    addEventListener('DOMContentLoaded', () => scrollTo(0, 0));
+    addEventListener('load', () => scrollTo(0, 0));
+  </script>
   <script type="importmap">
     {"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
   </script>
@@ -32,7 +40,7 @@
         <span class="brand-text"><b>Anantaboga</b><span>Creative Studio</span></span>
       </a>
       <nav class="nav-center" aria-label="Main">
-        <a href="#about">About</a><a href="#culture">Culture</a><a href="#services">Services</a><a href="#work">Work</a><a href="#pricing">Pricing</a><a href="#contact">Contact</a>
+        <a href="#about">About</a><a href="#culture">Culture</a><a href="#services">Services</a><a href="#work">Work</a><a href="#pricing">Packages</a><a href="#contact">Contact</a>
       </nav>
       <p class="head-clock mono" aria-label="Local time in Kota Batu"><span data-clock>--:--</span> WIB</p>
       <a class="pill head-cta" href="#contact"><span>Start a project</span></a>
@@ -43,7 +51,7 @@
         <a href="#culture">Culture</a>
         <a href="#services">Services</a>
         <a href="#work">Work</a>
-        <a href="#pricing">Pricing</a>
+        <a href="#pricing">Packages</a>
         <a href="#contact">Contact</a>
         <a class="btn btn-orange" href="#contact">Start a project</a>
       </nav>
@@ -152,6 +160,7 @@
         <h2 class="sr-only" id="services-title">Services</h2>
         <div class="svc-stage">
           <article class="svc-panel is-active" data-i="0">
+            <p class="svc-kicker">Service 01 / 05</p>
             <h3 class="svc-word">Aftermovies</h3>
             <div class="svc-shots" aria-hidden="true"><img src="image/work/batu-culture-festival.webp" alt="" loading="lazy" class="shot shot-0"><img src="image/work/grebeg-ketupat.webp" alt="" loading="lazy" class="shot shot-1"><img src="image/work/dolan-jaran.webp" alt="" loading="lazy" class="shot shot-2"></div>
             <div class="svc-copy">
@@ -160,6 +169,7 @@
             </div>
           </article>
           <article class="svc-panel" data-i="1">
+            <p class="svc-kicker">Service 02 / 05</p>
             <h3 class="svc-word">Company Profiles</h3>
             <div class="svc-shots" aria-hidden="true"><img src="image/work/united-tractors.webp" alt="" loading="lazy" class="shot shot-0"><img src="image/work/first-resources.webp" alt="" loading="lazy" class="shot shot-1"><img src="image/work/kemendagri.webp" alt="" loading="lazy" class="shot shot-2"></div>
             <div class="svc-copy">
@@ -168,6 +178,7 @@
             </div>
           </article>
           <article class="svc-panel" data-i="2">
+            <p class="svc-kicker">Service 03 / 05</p>
             <h3 class="svc-word">Documentaries</h3>
             <div class="svc-shots" aria-hidden="true"><img src="image/work/pujon-adventure.webp" alt="" loading="lazy" class="shot shot-0"><img src="image/work/rock-gunung.webp" alt="" loading="lazy" class="shot shot-1"><img src="image/work/patrol-sidomulyo.webp" alt="" loading="lazy" class="shot shot-2"></div>
             <div class="svc-copy">
@@ -176,6 +187,7 @@
             </div>
           </article>
           <article class="svc-panel" data-i="3">
+            <p class="svc-kicker">Service 04 / 05</p>
             <h3 class="svc-word">Public Service Ads</h3>
             <div class="svc-shots" aria-hidden="true"><img src="image/work/ilm-kerajinan.webp" alt="" loading="lazy" class="shot shot-0"><img src="image/work/ilm-olahan.webp" alt="" loading="lazy" class="shot shot-1"><img src="image/work/komdigi.webp" alt="" loading="lazy" class="shot shot-2"></div>
             <div class="svc-copy">
@@ -184,6 +196,7 @@
             </div>
           </article>
           <article class="svc-panel" data-i="4">
+            <p class="svc-kicker">Service 05 / 05</p>
             <h3 class="svc-word">School Films</h3>
             <div class="svc-shots" aria-hidden="true"><img src="image/work/smpn2-pensi.webp" alt="" loading="lazy" class="shot shot-0"><img src="image/work/smpn2-tasyakuran.webp" alt="" loading="lazy" class="shot shot-1"><img src="image/work/dolan-jaran.webp" alt="" loading="lazy" class="shot shot-2"></div>
             <div class="svc-copy">
@@ -192,12 +205,10 @@
             </div>
           </article>
         </div>
-        <ol class="svc-index" aria-hidden="true"><li class="is-active"><span class="mono">01</span>Aftermovies</li><li><span class="mono">02</span>Company Profiles</li><li><span class="mono">03</span>Documentaries</li><li><span class="mono">04</span>Public Service Ads</li><li><span class="mono">05</span>School Films</li></ol>
+        <p class="svc-hint" aria-hidden="true">Scroll to explore</p>
         <div class="svc-progress" aria-hidden="true"><span></span></div>
       </div>
     </section>
-
-    <div class="eye-band" aria-hidden="true"></div>
 
     <section class="s work on-cream" id="work" aria-labelledby="work-title">
       <div class="s-wrap">
@@ -507,37 +518,106 @@
     </section>
 
     <section class="s pricing" id="pricing" aria-labelledby="pricing-title">
+      <div class="pkg-stars" aria-hidden="true"></div>
       <div class="s-wrap">
         <div class="s-top">
-          <p class="tag"><span class="tag-no">04</span>Pricing:</p>
-          <p class="tag tag-muted">Every quote is fitted to the brief</p>
+          <p class="tag"><span class="tag-no">04</span>Packages:</p>
+          <p class="tag tag-muted">Prices on request</p>
         </div>
-        <h2 class="statement small" id="pricing-title" data-words>Three ways to work with us. Tell us the date and the place, and we will send a plan and a price.</h2>
-        <div class="plans">
-          <article class="plan">
-            <p class="mono plan-no">01</p>
-            <h3>Essential</h3>
-            <p class="plan-lede">For a single event or a short promo.</p>
-            <p class="plan-price"><span class="mono">From</span> <b data-price="essential">On request</b></p>
-            <ul><li>Half-day shoot, one camera operator</li><li>One edited film, up to 2 minutes</li><li>Licensed music and colour grade</li><li>One round of revisions</li></ul>
-            <a class="pill" href="#contact"><span>Ask about Essential</span></a>
-          </article>
-          <article class="plan is-featured">
-            <p class="mono plan-no">02<span class="plan-flag">Festivals &amp; events</span></p>
-            <h3>Signature</h3>
-            <p class="plan-lede">For festivals, carnivals and company events.</p>
-            <p class="plan-price"><span class="mono">From</span> <b data-price="signature">On request</b></p>
-            <ul><li>Full-day shoot, two-person crew</li><li>Aftermovie up to 5 minutes and a 30-second cut for social</li><li>Drone shots where permitted</li><li>Two rounds of revisions</li></ul>
-            <a class="pill" href="#contact"><span>Ask about Signature</span></a>
-          </article>
-          <article class="plan">
-            <p class="mono plan-no">03</p>
-            <h3>Legendary</h3>
-            <p class="plan-lede">Company profiles, documentaries and multi-day productions.</p>
-            <p class="plan-price"><span class="mono">From</span> <b data-price="legendary">On request</b></p>
-            <ul><li>Pre-production: research, script and shot list</li><li>Multi-day shoot with a full crew</li><li>Main film plus cut-downs for every channel</li><li>Revisions until sign-off</li></ul>
-            <a class="pill" href="#contact"><span>Ask about Legendary</span></a>
-          </article>
+        <div class="pkg-intro">
+          <h2 class="pkg-heading" id="pricing-title">Find the right package<span class="ast">.</span></h2>
+          <p class="pkg-sub">Pick a package, tell us the date and the place, and we will send the price.</p>
+          <div class="pkg-switch"><div class="pkg-tabs" role="tablist" aria-label="Package types"><span class="pkg-thumb" aria-hidden="true"></span><button type="button" class="pkg-tab is-active" role="tab" id="tab-graduation" aria-controls="pkg-graduation" aria-selected="true">Graduation</button><button type="button" class="pkg-tab" role="tab" id="tab-event" aria-controls="pkg-event" aria-selected="false">Events</button><button type="button" class="pkg-tab" role="tab" id="tab-live" aria-controls="pkg-live" aria-selected="false">Live streaming</button></div></div>
+        </div>
+        <div class="pkg-group" id="pkg-graduation" role="tabpanel" aria-labelledby="tab-graduation">
+          <p class="pkg-lede"><b>Graduation.</b> Wisuda perseorangan: graduation photos for one graduate.</p>
+          <div class="plans">
+            <article class="plan">
+              <h3>1 Hour</h3>
+              <p class="plan-lede">A short, focused session on the day.</p>
+              <p class="plan-price"><b data-price="grad-1">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>1 hour coverage</li><li>50 digital images</li><li>15 edited images</li><li>Online proof gallery</li><li>Three 4R prints</li></ul>
+              <a class="plan-cta" href="#contact">Ask about 1 Hour</a>
+            </article>
+            <article class="plan is-featured">
+              <p class="plan-flag"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>Most popular</p>
+              <h3>2 Hours</h3>
+              <p class="plan-lede">Time for family, friends and the campus.</p>
+              <p class="plan-price"><b data-price="grad-2">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>2 hours coverage</li><li>100 digital images</li><li>30 edited images</li><li>Online proof gallery</li><li>Two 4R or two 10R prints</li></ul>
+              <a class="plan-cta" href="#contact">Ask about 2 Hours</a>
+            </article>
+            <article class="plan">
+              <h3>3 Hours</h3>
+              <p class="plan-lede">The whole day, every image handed over.</p>
+              <p class="plan-price"><b data-price="grad-3">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>3 hours coverage</li><li>Full set of digital images</li><li>50 edited images</li><li>Online proof gallery</li><li>Seven 4R or two 10R prints</li></ul>
+              <a class="plan-cta" href="#contact">Ask about 3 Hours</a>
+            </article>
+          </div>
+        </div>
+        <div class="pkg-group" id="pkg-event" role="tabpanel" aria-labelledby="tab-event">
+          <p class="pkg-lede"><b>Events.</b> Photo and video for festivals, ceremonies and company events.</p>
+          <div class="plans">
+            <article class="plan">
+              <h3>Bronze</h3>
+              <p class="plan-lede">For a short event with one of each crew.</p>
+              <p class="plan-price"><b data-price="event-bronze">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>2&ndash;3 hour event</li><li>1 videographer</li><li>1 photographer</li><li>100 photos online</li><li>50 edited photos</li><li>1&ndash;3 minute video</li></ul>
+              <a class="plan-cta" href="#contact">Ask about Bronze</a>
+            </article>
+            <article class="plan is-featured">
+              <p class="plan-flag"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>Most popular</p>
+              <h3>Silver</h3>
+              <p class="plan-lede">Two cameras on video for a fuller film.</p>
+              <p class="plan-price"><b data-price="event-silver">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>3&ndash;4 hour event</li><li>2 videographers</li><li>1 photographer</li><li>150 photos online</li><li>75 edited photos</li><li>2&ndash;3 minute video</li></ul>
+              <a class="plan-cta" href="#contact">Ask about Silver</a>
+            </article>
+            <article class="plan">
+              <h3>Gold</h3>
+              <p class="plan-lede">Every photo, the most edits and the longest film.</p>
+              <p class="plan-price"><b data-price="event-gold">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>3&ndash;4 hour event</li><li>2 videographers</li><li>1 photographer</li><li>Unlimited photos online</li><li>100 edited photos</li><li>3&ndash;5 minute video</li></ul>
+              <a class="plan-cta" href="#contact">Ask about Gold</a>
+            </article>
+          </div>
+        </div>
+        <div class="pkg-group" id="pkg-live" role="tabpanel" aria-labelledby="tab-live">
+          <p class="pkg-lede"><b>Live streaming.</b> Stream your event live, in 1080p.</p>
+          <div class="plans">
+            <article class="plan">
+              <h3>Bronze</h3>
+              <p class="plan-lede">One camera for talks and simple stages.</p>
+              <p class="plan-price"><b data-price="live-bronze">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>2 hour event</li><li>1080p quality</li><li>1 camera</li></ul>
+              <a class="plan-cta" href="#contact">Ask about Bronze</a>
+            </article>
+            <article class="plan is-featured">
+              <p class="plan-flag"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>Most popular</p>
+              <h3>Silver</h3>
+              <p class="plan-lede">Two angles to cut between.</p>
+              <p class="plan-price"><b data-price="live-silver">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>2&ndash;3 hour event</li><li>1080p quality</li><li>2 cameras</li></ul>
+              <a class="plan-cta" href="#contact">Ask about Silver</a>
+            </article>
+            <article class="plan">
+              <h3>Gold</h3>
+              <p class="plan-lede">Three cameras for the full show.</p>
+              <p class="plan-price"><b data-price="live-gold">On request</b></p>
+              <p class="plan-note">Send us your date for a quote</p>
+              <ul><li>4 hour event</li><li>1080p quality</li><li>3 cameras</li></ul>
+              <a class="plan-cta" href="#contact">Ask about Gold</a>
+            </article>
+          </div>
         </div>
       </div>
     </section>
@@ -553,7 +633,7 @@
         <div class="contact-cols">
           <div><p class="tag">Write:</p><a class="big-link" href="mailto:anantabogacreativestudio@gmail.com?subject=Project%20enquiry">anantabogacreativestudio@gmail.com</a></div>
           <div><p class="tag">Visit:</p><p>Mojorejo, Kec. Junrejo<br>Kota Batu, Jawa Timur 65322</p><a class="pill" href="https://maps.app.goo.gl/mMN3CuisLAhA4bdY6" target="_blank" rel="noopener"><span>Get directions</span></a></div>
-          <div><p class="tag">Navigate:</p><nav class="foot-nav" aria-label="Footer"><a href="#about">About</a><a href="#services">Services</a><a href="#work">Work</a><a href="#pricing">Pricing</a></nav></div>
+          <div><p class="tag">Navigate:</p><nav class="foot-nav" aria-label="Footer"><a href="#about">About</a><a href="#services">Services</a><a href="#work">Work</a><a href="#pricing">Packages</a></nav></div>
         </div>
         <div class="map"><iframe src="https://maps.google.com/maps?q=Anantaboga+Creative+Studio,+Mojorejo,+Junrejo,+Kota+Batu,+Jawa+Timur+65322&amp;z=15&amp;output=embed" title="Map showing Anantaboga Creative Studio in Mojorejo, Kota Batu" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
       </div>

@@ -13,7 +13,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; } /* no CSS smooth scroll: it breaks the pinned sections; links scroll in js/script.js */
 body {
   background: var(--black); color: var(--white);
   font-family: var(--font); font-size: 17px; line-height: 1.6; font-variation-settings: "wdth" 100;

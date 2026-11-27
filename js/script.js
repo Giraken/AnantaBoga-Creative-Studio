@@ -105,3 +105,21 @@
   player.addEventListener('close', () => { frame.innerHTML = ''; opener?.focus(); });
 
 })();
+
+// In-page links (nav, buttons, footer) scroll smoothly without putting #section in the address bar
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const head = document.querySelector('.site-head, header');
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const id = a.getAttribute('href').slice(1);
+    const target = id === 'top' || id === '' ? null : document.getElementById(id);
+    if (id && id !== 'top' && !target) return;
+    e.preventDefault();
+    const offset = target ? Math.max(0, (head?.offsetHeight || 0) - 1) : 0;
+    const top = target ? target.getBoundingClientRect().top + window.scrollY - (target.matches('.s') ? 0 : offset) : 0;
+    window.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+    if (target && a.classList.contains('skip')) { target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true }); }
+  });
+})();

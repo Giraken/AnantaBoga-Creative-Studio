@@ -70,7 +70,7 @@
 .ph-row { position: relative; display: block; }
 .ph-r1 { transform: translateX(calc(var(--words, 0) * (-100% - var(--edge)))); }
 .ph-r2 { transform: translateX(calc(var(--words, 0) * (100% + var(--edge)))); }
-.hero3d.is-measuring .ph-row { transform: none; } /* the 3D copy is painted from the unmoved layout */
+.is-measuring .ph-row { transform: none !important; } /* the 3D copy is painted from the unmoved layout */
 .poster-block { position: absolute; background: var(--orange); }
 .poster-block.pb1 { left: 0; top: 12%; width: 13%; height: 80%; }
 .poster-block.pb2 { left: 56%; top: 0; width: 34%; height: 92%; }
@@ -153,7 +153,7 @@
   .pg-circle.c1 { width: 58vw; } .pg-circle.c2 { width: 88vw; }
   .poster-head { left: 14px; right: 14px; bottom: 18px; font-size: 21.5vw; }
   .hero-side { position: static; width: auto; margin: 0 16px; }
-  .hero-right { order: 1; margin-top: 24px; }
+  .hero-right { order: 1; margin-top: 24px; margin-bottom: 48px; }
   .hero-left { order: 2; margin-top: 28px; margin-bottom: 56px; }
   .hero-services a { font-size: 22px; }
   .hero-actions .btn { flex: 1 1 0; justify-content: center; }
