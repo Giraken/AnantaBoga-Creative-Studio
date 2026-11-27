@@ -268,7 +268,6 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font); font-
 .fly-hero .svc-stage::before, .fly-hero .svc-stage::after { display: none; } /* no rings in the hero */
 .fly-hero .svc-panel { inset: 80px var(--edge) 90px; }
 .fly-title { max-width: none; font-size: clamp(50px, 7.6vw, 160px); white-space: nowrap; }
-.fly-title span { display: block; }
 @media (max-width: 640px) { .fly-title { font-size: calc((100vw - 32px) / 7.9); } .fly-hero .svc-panel { inset: 80px 16px 90px; } }
 .fly-hero .svc-copy { display: flex; flex-direction: column; align-items: center; gap: 22px; max-width: 46ch; margin-top: 26px; }
 .fly-lede { margin: 0; font-size: clamp(18px, 1.55vw, 23px); line-height: 1.4; letter-spacing: -.02em; color: rgba(251,246,238,.82); }
@@ -276,11 +275,13 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font); font-
 .fly-cta { min-height: 52px; padding: 14px 30px; font-size: 16px; }
 .static .fly-hero .svc-pin { padding-top: 110px; }
 /* On opening: "Anantaboga Creative Studio" rises in, then the line and the button together */
-.fly-title span, .fly-lede, .fly-cta { animation: fly-in 1.1s cubic-bezier(.2,.7,.2,1) both; }
-.fly-title span { animation-delay: .25s; }
-.fly-lede, .fly-cta { animation-delay: 1s; }
+.fly-lede, .fly-cta { animation: fly-in 1.1s cubic-bezier(.2,.7,.2,1) 1s both; }
+/* The title animates as one element and without blur: its gradient is clipped to the letters, and
+   phone browsers (Safari above all) drop that text when a blur or a separately moving child is involved */
+.fly-title { animation: fly-rise 1.1s cubic-bezier(.2,.7,.2,1) .25s both; }
+@keyframes fly-rise { from { opacity: 0; transform: translateY(46px); } }
 @keyframes fly-in { from { opacity: 0; transform: translateY(46px); filter: blur(10px); } }
-@media (prefers-reduced-motion: reduce) { .fly-title span, .fly-lede, .fly-cta { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .fly-title, .fly-lede, .fly-cta { animation: none; } }
 .static .fly-hero .svc-copy { align-items: flex-start; }
 
 /* ---------- Work: an accordion of the five kinds of film (white) ----------
